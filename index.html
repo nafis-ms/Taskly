@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Taskly – We Provide To-Do List, Reminder, Task Holder,
+      Discipline</title>
+    <meta name="color-scheme" content="light">
+    <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=12">
+    <link rel="stylesheet" href="css/theme.css?v=8">
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"
+      focusable="false">
+      <filter id="lum2alpha" color-interpolation-filters="sRGB" x="-10%"
+        y="-10%" width="120%" height="120%">
+        <fecolormatrix type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0.55 0.9 0.6 0 0" />
+      </filter>
+    </svg>
+
+    <div class="page">
+      <div class="glow" aria-hidden="true"><i class="g1"></i><i
+          class="g2"></i><i class="g3"></i></div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="logo" href="#"><svg viewBox="0 0 24 24" fill="none"
+            aria-hidden="true"><rect width="24" height="24" rx="7"
+              fill="#0084ff" /><path d="M7 12.5l3.2 3.2L17 8.8" stroke="#fff"
+              stroke-width="2.4" stroke-linecap="round"
+              stroke-linejoin="round" /></svg>Taskly</a>
+        <ul class="links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#about">About us</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li data-auth="in" hidden><a href="app.html">Open app</a></li>
+        </ul>
+        <div class="tools">
+          <button type="button" class="acct-btn theme-btn" id="themeBtn"
+            aria-label="Switch to dark mode" aria-pressed="false"><svg
+              class="i-moon" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path
+                d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg><svg
+              class="i-sun" viewBox="0 0 24 24" width="20" height="20"
+              fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><circle cx="12" cy="12" r="4" /><path
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg></button>
+          <div class="acct" id="acct">
+            <button type="button" class="acct-btn" id="acctBtn"
+              aria-label="Account" aria-haspopup="true" aria-expanded="false"
+              aria-controls="acctMenu"><svg viewBox="0 0 24 24" width="20"
+                height="20" fill="none" stroke="#0b1220" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"><circle cx="12" cy="8" r="4" /><path
+                  d="M4 21c0-4 3.6-7 8-7s8 3 8 7" /></svg></button>
+            <div class="acct-menu" id="acctMenu">
+              <a href="#login" data-login data-auth="out">Log in</a>
+              <a href="#signup" data-open="Sign up" data-auth="out">Sign up</a>
+              <a href="#logout" data-logout data-auth="in" hidden>Log out</a>
+            </div>
+          </div>
+        </div>
+        <button class="burger" id="burger" aria-label="Menu"
+          aria-expanded="false"
+          aria-controls="mmenu"><span></span><span></span></button>
+      </nav>
+      <div class="mmenu" id="mmenu" hidden>
+        <a href="#home">Home</a><a href="#features">Features</a><a
+          href="#about">About us</a><a href="#contact">Contact</a><a
+          href="app.html" data-auth="in" hidden>Open app</a>
+      </div>
+
+      <main class="main">
+        <section class="hero" id="home">
+          <div class="copy">
+            <div class="rating">
+              <span class="stars" aria-hidden="true">
+                <svg viewBox="0 0 20 20"><path
+                    d="M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z" /></svg>
+                <svg viewBox="0 0 20 20"><path
+                    d="M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z" /></svg>
+                <svg viewBox="0 0 20 20"><path
+                    d="M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z" /></svg>
+                <svg viewBox="0 0 20 20"><path
+                    d="M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z" /></svg>
+                <svg viewBox="0 0 20 20"><path
+                    d="M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z" /></svg>
+              </span>
+              <span>Rated 4.9/5 by 2700+ customers</span>
+            </div>
+            <h1
+              aria-label="We Remember Your Task, Assignment, Date, Anniversary, Events, Birthday"><span
+                aria-hidden="true">We Remember Your</span> <span class="rot"
+                id="rot" aria-hidden="true">Task</span></h1>
+            <p class="sub">Effortlessly manage your projects, collaborate with
+              your team, and achieve your goals with our intuitive task
+              management tool.</p>
+            <div class="ctas">
+            <a class="cta" href="app.html" id="cta">Get Started
+              Now
+              <span class="ic"><svg viewBox="0 0 16 16" fill="none"
+                  aria-hidden="true"><path d="M3 8h10M8.5 3.5L13 8l-4.5 4.5"
+                    stroke="#0084ff" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" /></svg></span>
+            </a>
+            <a class="cta2" href="#features">Learn more</a>
+            </div>
+          </div>
+
+          <div class="orb-wrap" id="orb">
+            <div class="orb-fallback"></div>
+            <video class="orb-video" id="orbVideo" muted playsinline hidden></video>
+            <div class="orb-grab" id="orbGrab" tabindex="0" role="button"
+              aria-label="Orb: push it with the cursor, drag it, or use the arrow keys. It falls back to its place."></div>
+          </div>
+        </section>
+
+        <section class="trusted" aria-label="Customers">
+          <p>Trusted by Top-tier product companies</p>
+          <div class="logos">
+            <svg viewBox="0 0 120 28" role="img" aria-label="Northwind"><circle
+                cx="13" cy="14" r="10" /><circle cx="13" cy="14" r="4"
+                fill="#fff" /><text x="30" y="20" font-family="Inter,sans-serif"
+                font-weight="500" font-size="17">Northwind</text></svg>
+            <svg viewBox="0 0 100 28" role="img" aria-label="Lumen"><path
+                d="M3 24V4h5v16h9v4z" /><text x="24" y="20"
+                font-family="Inter,sans-serif" font-weight="500"
+                font-size="17">umen</text></svg>
+            <svg viewBox="0 0 104 28" role="img" aria-label="Orbitly"><ellipse
+                cx="13" cy="14" rx="11" ry="6" fill="none" stroke="#8b919b"
+                stroke-width="2.5" transform="rotate(-25 13 14)" /><circle
+                cx="13" cy="14" r="4" /><text x="30" y="20"
+                font-family="Inter,sans-serif" font-weight="500"
+                font-size="17">Orbitly</text></svg>
+            <svg viewBox="0 0 108 28" role="img" aria-label="Vertex"><path
+                d="M2 4h6l6 14 6-14h6L14 26z" /><text x="36" y="20"
+                font-family="Inter,sans-serif" font-weight="500"
+                font-size="17">ertex</text></svg>
+            <svg viewBox="0 0 112 28" role="img" aria-label="Nimbus"><rect x="2"
+                y="4" width="20" height="20" rx="6" /><rect x="8" y="10"
+                width="8" height="8" rx="2" fill="#fff" /><text x="30" y="20"
+                font-family="Inter,sans-serif" font-weight="500"
+                font-size="17">Nimbus</text></svg>
+          </div>
+        </section>
+
+        <section class="sec" id="features">
+          <h2>Everything your team needs</h2>
+          <div class="cards">
+            <article class="card"><h3>Boards & lists</h3><p>Switch between
+                kanban boards and lists. Drag tasks across stages in one
+                move.</p></article>
+            <article class="card"><h3>Team comments</h3><p>Discuss work right on
+                the task, so decisions stay next to the details.</p></article>
+            <article class="card"><h3>Due-date reminders</h3><p>Get a nudge
+                before a deadline slips, by email or push
+                notification.</p></article>
+          </div>
+        </section>
+
+        <section class="sec" id="about">
+          <h2>About us</h2>
+          <p class="lede">We build Taskly for teams who are tired of juggling
+            five tools to get one project done. Our goal is simple: make
+            planning, handing off and finishing work feel calm.</p>
+          <div class="cards">
+            <article class="card"><h3>Clarity first</h3><p>Every task shows who
+                owns it and when it's due, so nobody has to ask.</p></article>
+            <article class="card"><h3>Fast by default</h3><p>Add a task in
+                seconds and move on. The tool stays out of your
+                way.</p></article>
+            <article class="card"><h3>Built with customers</h3><p>Most features
+                start as a request from a team using Taskly every
+                day.</p></article>
+          </div>
+        </section>
+
+        <section class="sec" id="contact">
+          <h2>Contact us</h2>
+          <div class="contact">
+            <div class="cinfo">
+              <p class="lede">Questions, feedback or a demo request? Send a
+                message and we'll reply within one business day.</p>
+              <p><b>Email</b><br><a
+                  href="mailto:hello@taskly.example">hello@taskly.example</a></p>
+              <p><b>Support hours</b><br>Monday to Friday, 9:00 to 18:00</p>
+            </div>
+            <form class="card cform" id="cform" novalidate>
+              <label>Name<input name="cn" autocomplete="name"><span
+                  class="err"></span></label>
+              <label>Email<input name="ce" type="email"
+                  autocomplete="email"><span class="err"></span></label>
+              <label>Message<textarea name="cm" rows="4"></textarea><span
+                  class="err"></span></label>
+              <button class="submit" type="submit">Send message</button>
+              <p class="ok" id="cstatus" role="status"></p>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal" id="modal" hidden>
+      <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="mt">
+        <button type="button" class="x" id="mx" aria-label="Close">×</button>
+        <form id="form" novalidate>
+          <h3 id="mt">Create your account</h3>
+          <p class="lead" id="ml">Free for 14 days. No card needed.</p>
+          <label>Full name<input name="name" autocomplete="name"><span
+              class="err"></span></label>
+          <label>Work email<input name="email" type="email"
+              autocomplete="email"><span class="err"></span></label>
+          <label>Password<input name="pw" type="password"
+              autocomplete="new-password"><span class="err"></span></label>
+          <button class="submit" type="submit">Create account</button>
+          <p class="switch">Already have an account? <button type="button"
+              class="link" id="toLogin">Log in</button></p>
+        </form>
+        <div class="done" id="done" hidden>
+          <h3 id="dt">You're in!</h3>
+          <p class="lead" id="dm"></p>
+          <button type="button" class="submit" id="dc">Done</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="lmodal" hidden>
+      <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="lt">
+        <button type="button" class="x" id="lx" aria-label="Close">×</button>
+        <form id="lform" novalidate>
+          <h3 id="lt">Welcome back</h3>
+          <p class="lead">Log in to your Taskly account.</p>
+          <label>Email<input name="le" type="email" autocomplete="email"><span
+              class="err"></span></label>
+          <label>Password<span class="pw"><input name="lp" type="password"
+                autocomplete="current-password"><button type="button"
+                class="eye" id="eye" aria-label="Show password"
+                aria-pressed="false">Show</button></span><span
+              class="err"></span></label>
+          <button type="button" class="link" id="forgot">Forgot
+            password?</button>
+          <button class="submit" type="submit" style="margin-top:14px">Log
+            in</button>
+          <p class="ok" id="lstatus" role="status"></p>
+          <p class="switch">New to Taskly? <button type="button" class="link"
+              id="toSignup">Create an account</button></p>
+        </form>
+        <div class="done" id="ldone" hidden>
+          <h3>You're logged in</h3>
+          <p class="lead" id="ldm"></p>
+          <button type="button" class="submit" id="lc">Done</button>
+        </div>
+      </div>
+    </div>
+    <script src="js/script.js?v=12"></script>
+      <script src="js/plexus.js?v=2"></script>
+  </body>
+</html>
