@@ -13,8 +13,10 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=13">
-    <link rel="stylesheet" href="css/app.css?v=7">
-    <link rel="stylesheet" href="css/theme.css?v=8">
+    <link rel="stylesheet" href="css/app.css?v=6">
+    <link rel="stylesheet" href="css/theme.css?v=7">
+    <link rel="stylesheet" href="css/dashboard.css?v=8">
+    <script type="module" src="https://cdn.spline.design/@splinetool/viewer@2.0.87/build/spline-viewer.js"></script>
   </head>
   <body>
     <div class="page">
@@ -54,8 +56,18 @@
           <span class="sep" aria-hidden="true"></span>
           <div class="tablist" role="tablist" aria-label="Taskly sections"
             aria-orientation="vertical">
+            <button type="button" class="dk" role="tab" id="t-dashboard"
+              aria-controls="p-dashboard" aria-selected="true" data-tab="dashboard"><span
+                class="ic"><svg viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true"><rect x="3.5" y="3.5" width="7.5" height="9" rx="2" /><rect
+                    x="13" y="3.5" width="7.5" height="5.5" rx="2" /><rect x="13"
+                    y="11" width="7.5" height="9.5" rx="2" /><rect x="3.5" y="14.5"
+                    width="7.5" height="6" rx="2" /></svg></span><span
+                class="lbl">Dashboard</span></button>
             <button type="button" class="dk" role="tab" id="t-todo"
-              aria-controls="p-todo" aria-selected="true" data-tab="todo"><span
+              aria-controls="p-todo" aria-selected="false" tabindex="-1" data-tab="todo"><span
                 class="ic"><svg viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="1.8"
                   stroke-linecap="round" stroke-linejoin="round"
@@ -99,9 +111,94 @@
               class="lbl">Log out</span></button>
         </nav>
 
+        <!-- Dashboard -->
+        <section class="dash" id="p-dashboard" role="tabpanel"
+          aria-labelledby="t-dashboard">
+
+          <div class="dcol dl">
+            <article class="dcard welcome" id="dWelcome">
+              <p class="eyebrow" id="dDate"></p>
+              <h1 id="dGreet"></h1>
+              <p class="dsub">What would you like to accomplish today?</p>
+              <div class="dchips" id="dChips"></div>
+            </article>
+
+            <article class="dcard" id="cToday">
+              <div class="dh"><h2>Today's schedule</h2><div class="dh-r"><span
+                    class="dprog" id="tProg"></span><button type="button"
+                    class="dlink" data-goto="schedule">Edit</button></div></div>
+              <div class="pbar" aria-hidden="true"><i id="tBar"></i></div>
+              <div class="wr" id="dToday"></div>
+              <button type="button" class="dlink full-cal" data-goto="schedule">View full schedule &rsaquo;</button>
+            </article>
+
+            <article class="dcard" id="cRem" hidden>
+              <div class="dh"><h2>Upcoming reminder</h2><button type="button"
+                  class="dlink" data-goto="reminders">View all</button></div>
+              <div class="dlist" id="dRemList"></div>
+            </article>
+
+            <article class="dcard" id="cTodo" hidden>
+              <div class="dh"><h2>To-Do</h2><button type="button" class="dlink"
+                  data-goto="todo">Manage</button></div>
+              <div class="dlist" id="dTodoList"></div>
+            </article>
+          </div>
+
+          <div class="dcol dc">
+            <article class="dcard robot" id="cRobot" aria-label="Taskly assistant">
+              <div class="dh robot-h"><h2>Assistant</h2></div>
+              <div class="robot-ph" id="robotPh">Waking up the robot…</div>
+              <spline-viewer id="robot"
+                url="https://prod.spline.design/Ajj1EOdqp6bJQLag/scene.splinecode"></spline-viewer>
+              <div class="bubble" role="status"><span id="dSummary"></span></div>
+            </article>
+
+            <article class="dcard cycle" id="cCycle">
+              <div class="dh"><h2>24-hour cycle</h2></div>
+              <svg class="ring" id="ring" viewBox="0 0 280 280" role="img"
+                aria-label="24 hour cycle"><circle class="r-track" cx="140"
+                  cy="140" r="88" /><g id="rBlocks"></g><g id="rTicks"></g><circle
+                  class="r-el-bg" cx="140" cy="140" r="106" /><circle
+                  class="r-el" id="rEl" cx="140" cy="140" r="106"
+                  transform="rotate(-90 140 140)" /><circle class="r-needle"
+                  id="rNeedle" r="7" cx="140" cy="52" /><text class="r-pct"
+                  id="rPct" x="140" y="136" text-anchor="middle">0%</text><text
+                  class="r-lbl" x="140" y="160" text-anchor="middle">of today gone</text></svg>
+              <div class="stats">
+                <div class="stat"><b id="sEl">0%</b><span>Elapsed</span></div>
+                <div class="stat"><b id="sPl">0%</b><span>Planned</span></div>
+                <div class="stat"><b id="sDn">0%</b><span>Completed</span></div>
+              </div>
+              <div class="legend"><span><i class="lg lg-plan"></i>Planned</span><span><i
+                    class="lg lg-done"></i>Completed</span><span><i class="lg lg-now"></i>Now</span></div>
+            </article>
+          </div>
+
+          <div class="dcol dr">
+            <article class="dcard clock" aria-label="Live clock">
+              <div class="dh"><h2>Live time</h2><button type="button"
+                  class="dlink" id="clkToggle" aria-label="Switch between 12 and 24 hour clock">12 / 24h</button></div>
+              <div class="time" id="dTime"><span id="tH">--</span><span
+                  class="colon">:</span><span id="tM">--</span><span
+                  class="secs"><span class="colon">:</span><span id="tS">--</span></span><span
+                  class="ampm" id="tA"></span></div>
+              <div class="tsub"><span id="dDay"></span><span id="dLeft"></span></div>
+            </article>
+
+            <article class="dcard" id="cWeek">
+              <div class="dh"><h2>Weekly routine</h2><div class="dh-r"><span class="wr-range" id="wrRange"></span><button type="button"
+                  class="dlink" data-goto="schedule">Edit</button></div></div>
+              <div class="wr" id="dWeek"></div>
+            </article>
+
+          </div>
+
+        </section>
+
         <!-- To-Do -->
         <section class="panel" id="p-todo" role="tabpanel"
-          aria-labelledby="t-todo">
+          aria-labelledby="t-todo" hidden>
           <h2>To-Do</h2>
           <form class="row" id="todoForm" novalidate>
             <label class="grow"><span class="sr">New task</span><input
@@ -173,6 +270,27 @@
           <ol class="list timeline" id="schList"></ol>
           <p class="empty" id="schEmpty">Nothing planned for this day. Add a
             time block above.</p>
+
+          <hr class="sdiv">
+          <h3 class="sh3">Weekly routine</h3>
+          <p class="hint">Repeats every week. It appears in today's schedule and on your dashboard.</p>
+          <form class="grid" id="wkForm" novalidate>
+            <label class="full">Routine<input name="title"
+                placeholder="e.g. Gym, Study, Sleep" autocomplete="off"
+                maxlength="200"><span class="err"></span></label>
+            <label>Start<input name="start" type="time"><span
+                class="err"></span></label>
+            <label>End<input name="end" type="time"><span
+                class="err"></span></label>
+            <fieldset class="full days">
+              <legend>Repeat on</legend>
+              <div class="dayrow" id="wkDays"></div>
+              <span class="err" id="wkDaysErr"></span>
+            </fieldset>
+            <button class="btn full" type="submit">Add to weekly routine</button>
+          </form>
+          <div id="wkList"></div>
+          <p class="empty" id="wkEmpty">No weekly routine yet. Add one above.</p>
         </section>
 
         <!-- History -->
@@ -187,6 +305,6 @@
     </div>
 
     <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
-    <script src="js/app.js?v=7"></script>
+    <script src="js/app.js?v=15"></script>
   </body>
 </html>
