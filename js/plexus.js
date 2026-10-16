@@ -195,7 +195,9 @@
   }
 
   function sync() {
-    var dark = root.getAttribute("data-theme") === "dark";
+    /* in the app (it has a Settings button) the network only runs when Background effect is on */
+    var inApp = !!document.getElementById("settingsBtn"),
+      dark = root.getAttribute("data-theme") === "dark" && (!inApp || root.getAttribute("data-fx") === "on");
     if (dark && !running) {
       running = true; last = 0; t0 = 0; lastY = scrollY;
       requestAnimationFrame(frame);
@@ -209,6 +211,6 @@
   addEventListener("resize", resize);
   addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") { mx = e.clientX; my = e.clientY; } });
   document.addEventListener("mouseleave", function () { mx = my = -1e4; });
-  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme", "data-fx"] });
   sync();
 })();

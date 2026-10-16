@@ -173,6 +173,8 @@
       ". We sent a confirmation link to " +
       v.email.value.trim() +
       ".";
+    savePw(v.email.value.trim(), v.pw.value);
+    TasklyStore.signup(v.email.value.trim(), v.name.value.trim());
     setUser(v.email.value.trim(), v.name.value.trim());
     form.hidden = true;
     done.hidden = false;
@@ -482,6 +484,17 @@
       v.lp.focus();
       return;
     }
+    var saved = pwMap()[v.le.value.trim().toLowerCase()];
+    if (saved && saved !== pwHash(v.lp.value)) {
+      lerr(v.lp, "Incorrect password.");
+      v.lp.focus();
+      return;
+    }
+    if (!TasklyStore.login(v.le.value.trim())) {
+      lerr(v.le, "This account is suspended. Contact support.");
+      v.le.focus();
+      return;
+    }
     $("#ldm").textContent =
       "Welcome back! You are logged in as " + v.le.value.trim() + ".";
     setUser(v.le.value.trim());
@@ -586,6 +599,32 @@
     } catch (e) {
       return {};
     }
+  }
+  /* passwords live only in this browser (no server): a salted hash per email, shared with Settings in the app */
+  function pwHash(pw) {
+    var s = "taskly|" + pw, h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 2654435761);
+      h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
+  }
+  function pwMap() {
+    try {
+      return JSON.parse(localStorage.getItem("taskly:pw") || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function savePw(email, pw) {
+    try {
+      var m = pwMap();
+      m[email.toLowerCase()] = pwHash(pw);
+      localStorage.setItem("taskly:pw", JSON.stringify(m));
+    } catch (e) {}
   }
   function setUser(email, name) {
     var key = email.toLowerCase();

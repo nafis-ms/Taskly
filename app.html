@@ -6,17 +6,16 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Taskly – Your tasks</title>
     <meta name="color-scheme" content="light">
-    <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+    <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark");if(localStorage.getItem("taskly:fx")==="1")document.documentElement.setAttribute("data-fx","on")}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=13">
-    <link rel="stylesheet" href="css/app.css?v=6">
+    <link rel="stylesheet" href="css/app.css?v=6g">
     <link rel="stylesheet" href="css/theme.css?v=7">
-    <link rel="stylesheet" href="css/dashboard.css?v=8">
-    <script type="module" src="https://cdn.spline.design/@splinetool/viewer@2.0.87/build/spline-viewer.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css?v=23">
   </head>
   <body>
     <div class="page">
@@ -102,6 +101,12 @@
                 class="lbl">History</span></button>
           </div>
           <span class="sep" aria-hidden="true"></span>
+          <button type="button" class="dk" id="settingsBtn" aria-haspopup="dialog"><span class="ic"><svg
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path
+                  d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg></span><span
+              class="lbl">Settings</span></button>
           <button type="button" class="dk" id="logoutBtn"><span class="ic"><svg
                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="1.8" stroke-linecap="round"
@@ -148,10 +153,316 @@
           <div class="dcol dc">
             <article class="dcard robot" id="cRobot" aria-label="Taskly assistant">
               <div class="dh robot-h"><h2>Assistant</h2></div>
-              <div class="robot-ph" id="robotPh">Waking up the robot…</div>
-              <spline-viewer id="robot"
-                url="https://prod.spline.design/Ajj1EOdqp6bJQLag/scene.splinecode"></spline-viewer>
-              <div class="bubble" role="status"><span id="dSummary"></span></div>
+              <div class="bot" id="bot" data-skin="violet" data-act="default" role="img"
+                aria-label="Taskly assistant robot. Its eyes follow your cursor. Click it to say hi.">
+                <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="botShell" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" class="bs1"/><stop offset=".55" class="bs2"/><stop offset="1" class="bs3"/>
+                    </linearGradient>
+                    <radialGradient id="botVisorG" cx=".36" cy=".28" r=".95">
+                      <stop offset="0" class="bv1"/><stop offset="1" class="bv2"/>
+                    </radialGradient>
+                    <linearGradient id="botSheen" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#fff" stop-opacity=".30"/>
+                      <stop offset=".44" stop-color="#fff" stop-opacity=".05"/>
+                      <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+                      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="botRimG" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+                      <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+                      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="botEyeG" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#ffffff"/><stop offset="1" class="be2"/>
+                    </linearGradient>
+                    <filter id="botGlow" x="-60%" y="-60%" width="220%" height="220%">
+                      <feGaussianBlur stdDeviation="2.4" result="b"/>
+                      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="botDrop" x="-20%" y="-20%" width="140%" height="155%">
+                      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".28"/>
+                    </filter>
+                    <g id="botHand">
+                      <rect class="cuff" x="-6.5" y="-10" width="13" height="6" rx="2.5"/>
+                      <rect x="-8" y="-6" width="16" height="18" rx="8"/>
+                      <ellipse cx="-10" cy="-1" rx="3.6" ry="6.5" transform="rotate(30 -10 -1)"/>
+                    </g>
+                  </defs>
+                  <ellipse class="gshadow" cx="150" cy="294" rx="46" ry="5.5"/>
+                  <g id="botTilt"><g class="float">
+                    <g id="botBody">
+                      <g class="armR">
+                        <path class="arm" d="M194 208 Q228 216 228 248"/>
+                        <path class="arm-h" transform="translate(-2.2 -1.4)" d="M194 208 Q228 216 228 248"/>
+                        <use href="#botHand" class="hf" transform="translate(228 248) scale(-1 1)"/>
+                      </g>
+                      <g class="armL">
+                        <path class="arm" id="botArmL" d="M106 208 Q72 216 72 248"/>
+                        <path class="arm-h" id="botArmLh" transform="translate(-2.2 -1.4)" d="M106 208 Q72 216 72 248"/>
+                        <use href="#botHand" class="hf" id="botHandL" transform="translate(72 248)"/>
+                      </g>
+                      <path class="shell" d="M100 196 C100 190 106 186 112 186 H188 C194 186 200 190 200 196 V222 C200 262 178 284 150 284 C122 284 100 262 100 222 Z"/>
+                      <path class="shine" d="M111 200 Q107 228 116 254"/>
+                      <path class="seam" d="M101 224 Q150 234 199 224"/>
+                      <circle class="corebg" cx="150" cy="248" r="17"/>
+                      <circle class="chest pulse" cx="150" cy="248" r="14.5" filter="url(#botGlow)"/>
+                      <circle class="core pulse" cx="150" cy="248" r="5" filter="url(#botGlow)"/>
+                      <circle class="led" cx="139" cy="209" r="1.8"/>
+                      <circle class="led" cx="150" cy="209" r="1.8"/>
+                      <circle class="led dim" cx="161" cy="209" r="1.8"/>
+                      <circle class="cap" cx="102" cy="208" r="8.5"/>
+                      <circle class="capdot" cx="102" cy="208" r="3"/>
+                      <circle class="cap" cx="198" cy="208" r="8.5"/>
+                      <circle class="capdot" cx="198" cy="208" r="3"/>
+                    <!-- ===== activity poses (shown by category + time; "default" = the original pose) ===== -->
+                                        <g class="act" data-for="creativity">
+                      <rect class="cv" x="106" y="214" width="88" height="50" rx="3"/>
+                      <path class="cv-st" d="M114 230 Q128 222 140 232" stroke="#38d6ff"/>
+                      <path class="cv-st" d="M150 224 Q164 236 186 222" stroke="#ff6fae"/>
+                      <circle cx="122" cy="248" r="5" fill="#7ad36a"/><circle cx="178" cy="250" r="4" fill="#ff9d4a"/>
+                      <path class="cv-st live" pathLength="100" stroke-dasharray="100" stroke="#ffc247" d="M122 258 Q150 234 182 256">
+                        <animate attributeName="stroke-dashoffset" dur="3s" repeatCount="indefinite" values="100;0;0" keyTimes="0;.7;1"/>
+                      </path>
+                      <ellipse class="pal" cx="76" cy="256" rx="19" ry="13"/>
+                      <circle cx="64" cy="251" r="3.4" fill="#ff5c7a"/><circle cx="74" cy="247" r="3.4" fill="#38d6ff"/><circle cx="85" cy="249" r="3.4" fill="#ffc247"/><circle cx="68" cy="261" r="3.4" fill="#7ad36a"/>
+                      <ellipse cx="86" cy="260" rx="3" ry="2.2" fill="#c9a877"/>
+                      <path class="arm" d="M106 208 Q92 230 90 246"/>
+                      <use href="#botHand" class="hf" transform="translate(90 248) rotate(-90)"/>
+                      <path class="arm" d="M194 208 Q156 212 128 240">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite" keyTimes="0;.35;.7;1" values="M194 208 Q156 212 128 240;M194 208 Q178 214 154 230;M194 208 Q198 226 184 246;M194 208 Q198 226 184 246"/>
+                      </path>
+                      <g>
+                        <animateMotion dur="3s" repeatCount="indefinite" path="M122 256 Q150 232 182 254" keyPoints="0;1;1" keyTimes="0;.7;1" calcMode="linear"/>
+                        <path d="M5 -6 L0 2" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="0" cy="2" r="2.6" fill="#ffc247"/>
+                        <use href="#botHand" class="hf" transform="translate(6 -8)"/>
+                      </g>
+                    </g>
+                    <g class="act" data-for="meal">
+                      <path class="arm" d="M106 208 Q102 226 118 226"><animate attributeName="d" dur="2s" repeatCount="indefinite" values="M106 208 Q102 226 118 226;M106 208 Q102 218 118 218;M106 208 Q102 226 118 226"/></path>
+                      <path class="arm" d="M194 208 Q198 226 182 226"><animate attributeName="d" dur="2s" repeatCount="indefinite" values="M194 208 Q198 226 182 226;M194 208 Q198 218 182 218;M194 208 Q198 226 182 226"/></path>
+                      <g>
+                        <animateTransform attributeName="transform" type="translate" dur="2s" repeatCount="indefinite" values="0 0;0 -9;0 0"/>
+                        <g transform="translate(150 224) scale(1.3) translate(-150 -224)">
+                        <rect x="128" y="220" width="44" height="8" rx="4" fill="#e0a458"/>
+                        <rect x="127" y="213" width="46" height="8" rx="4" fill="#6b3a22"/>
+                        <path d="M129 212 h42 l-6 7 l-6 -6 l-6 6 l-6 -6 l-6 6 z" fill="#ffd23f"/>
+                        <path d="M127 210 q4 -4 8 0 q4 4 8 0 q4 -4 8 0 q4 4 8 0 q4 -4 8 0 q4 4 6 0 v3 H127 z" fill="#6fcf4a"/>
+                        <path d="M128 209 Q128 191 150 191 Q172 191 172 209 Z" fill="#eba94c"/>
+                        <ellipse cx="140" cy="198" rx="2.4" ry="1.3" fill="#fff3cf"/><ellipse cx="152" cy="195" rx="2.4" ry="1.3" fill="#fff3cf"/><ellipse cx="162" cy="200" rx="2.4" ry="1.3" fill="#fff3cf"/>
+                        <use href="#botHand" class="hf" transform="translate(126 224) rotate(-90)"/>
+                        <use href="#botHand" class="hf" transform="translate(174 224) rotate(90)"/>
+                        </g>
+                      </g>
+                    </g>
+                    <g class="act" data-for="household">
+                      <rect class="pane" x="208" y="118" width="64" height="118" rx="6"/>
+                      <path class="pane-hi" d="M222 226 L256 126 M236 228 L266 140"/>
+                      <path class="spk" d="M258 134 l2 -6 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2z"><animate attributeName="opacity" dur="1.6s" repeatCount="indefinite" values="0;1;0"/></path>
+                      <path class="spk" d="M226 216 l1.5 -5 l1.5 5 l5 1.5 l-5 1.5 l-1.5 5 l-1.5 -5 l-5 -1.5z"><animate attributeName="opacity" dur="1.6s" begin=".8s" repeatCount="indefinite" values="0;1;0"/></path>
+                      <path class="arm" d="M194 208 Q216 198 226 168"><animate attributeName="d" dur="3.6s" repeatCount="indefinite" values="M194 208 Q216 198 226 168;M194 208 Q242 198 252 168;M194 208 Q216 216 226 186;M194 208 Q242 216 252 186;M194 208 Q216 234 226 204;M194 208 Q242 234 252 204;M194 208 Q216 198 226 168"/></path>
+                      <g>
+                        <animateTransform attributeName="transform" type="translate" dur="3.6s" repeatCount="indefinite" values="226 168;252 168;226 186;252 186;226 204;252 204;226 168"/>
+                        <rect class="cloth" x="2" y="-13" width="14" height="26" rx="5"/>
+                        <use href="#botHand" class="hf" transform="rotate(-90)"/>
+                      </g>
+                    </g>
+                    <g class="act" data-for="social">
+                      <rect class="ph" x="136" y="208" width="28" height="48" rx="5"/>
+                      <rect class="ph-cam" x="140" y="212" width="11" height="12" rx="3.5"/>
+                      <circle class="ph-lens" cx="145.5" cy="216" r="2.2"/><circle class="ph-lens" cx="145.5" cy="221" r="2.2"/>
+                      <circle class="ph-logo" cx="150" cy="238" r="4.5"/>
+                      <path class="arm" d="M106 208 Q106 238 134 244"/>
+                      <path class="arm" d="M194 208 Q194 238 166 244"/>
+                      <g><animateTransform attributeName="transform" type="translate" dur=".6s" repeatCount="indefinite" values="0 0;0 -3;0 0"/><use href="#botHand" class="hf" transform="translate(134 244) rotate(-90)"/></g>
+                      <g><animateTransform attributeName="transform" type="translate" dur=".6s" begin=".3s" repeatCount="indefinite" values="0 0;0 -3;0 0"/><use href="#botHand" class="hf" transform="translate(166 244) rotate(90)"/></g>
+                    </g>
+                    <g class="act" data-for="payment">
+                      <g><animateTransform attributeName="transform" type="translate" dur="1.4s" repeatCount="indefinite" values="0 0;0 -12;0 0"/>
+                        <g transform="rotate(-9 150 236)"><rect class="bill" x="134" y="222" width="32" height="20" rx="2"/><circle class="bill-c" cx="150" cy="232" r="4"/></g></g>
+                      <g><animateTransform attributeName="transform" type="translate" dur="1.4s" begin=".35s" repeatCount="indefinite" values="0 0;0 -12;0 0"/>
+                        <g transform="rotate(0 150 236)"><rect class="bill" x="134" y="224" width="32" height="20" rx="2"/><circle class="bill-c" cx="150" cy="234" r="4"/></g></g>
+                      <g><animateTransform attributeName="transform" type="translate" dur="1.4s" begin=".7s" repeatCount="indefinite" values="0 0;0 -12;0 0"/>
+                        <g transform="rotate(9 150 236)"><rect class="bill" x="134" y="224" width="32" height="20" rx="2"/><circle class="bill-c" cx="150" cy="234" r="4"/></g></g>
+                      <rect class="purse" x="120" y="238" width="60" height="32" rx="10"/>
+                      <path class="purse-fl" d="M121 249 Q150 259 179 249"/>
+                      <circle class="clasp" cx="150" cy="255" r="3.6"/>
+                      <path class="arm" d="M106 208 Q100 244 116 254"/>
+                      <path class="arm" d="M194 208 Q200 244 184 254"/>
+                      <use href="#botHand" class="hf" transform="translate(116 256) rotate(-90)"/>
+                      <use href="#botHand" class="hf" transform="translate(184 256) rotate(90)"/>
+                    </g>
+                    <g class="act" data-for="event">
+                      <path class="jk" d="M100 196 C100 190 106 186 112 186 H188 C194 186 200 190 200 196 V222 C200 262 178 284 150 284 C122 284 100 262 100 222 Z"/>
+                      <path class="shirt" d="M128 186 L150 244 L172 186 Z"/>
+                      <path class="lapel" d="M128 186 L150 244 L138 186 Z M172 186 L150 244 L162 186 Z"/>
+                      <circle class="shbtn" cx="150" cy="256" r="2.2"/><circle class="shbtn" cx="150" cy="268" r="2.2"/>
+                      <path class="pocket" d="M112 226 h12 l-2 -8 l-4 5 l-4 -5 z"/>
+                      <path class="bow" d="M150 202 L134 194 V210 Z M150 202 L166 194 V210 Z"/>
+                      <rect class="bow" x="145.5" y="197" width="9" height="10" rx="3"/>
+                    </g>
+                    <g class="act" data-for="study">
+                      <path class="bk-pg" d="M110 262 Q130 258 150 266 Q170 258 190 262 V266 Q170 262 150 270 Q130 262 110 266 Z"/>
+                      <path class="bk-cover" d="M150 228 Q130 219 108 223 V262 Q130 258 150 266 Z"/>
+                      <path class="bk-cover" d="M150 228 Q170 219 192 223 V262 Q170 258 150 266 Z"/>
+                      <path class="bk-spine" d="M150 228 V266"/>
+                      <rect class="bk-label" x="121" y="234" width="20" height="14" rx="2"/>
+                      <rect class="bk-label" x="159" y="234" width="20" height="14" rx="2"/>
+                      <path class="bk-deco" d="M124 240 H138 M124 244 H134 M162 240 H176 M162 244 H172"/>
+                      <path class="arm" d="M106 208 Q86 232 108 248"/>
+                      <path class="arm" d="M194 208 Q214 232 192 248"/>
+                      <use href="#botHand" class="hf" transform="translate(108 250)"/>
+                      <use href="#botHand" class="hf" transform="translate(192 250) scale(-1 1)"/>
+                    </g>
+                    <g class="act" data-for="work">
+                      <rect class="lp-base" x="103" y="262" width="94" height="7" rx="3.5"/>
+                      <rect class="lp-lid" x="110" y="222" width="80" height="42" rx="5"/>
+                      <circle class="lp-logo pulse" cx="150" cy="243" r="4.5" filter="url(#botGlow)"/>
+                      <path class="arm" d="M106 208 Q88 240 116 256">
+                        <animate attributeName="d" dur=".5s" repeatCount="indefinite" values="M106 208 Q88 240 116 256;M106 208 Q88 240 116 260;M106 208 Q88 240 116 256"/>
+                      </path>
+                      <path class="arm" d="M194 208 Q212 240 184 260">
+                        <animate attributeName="d" dur=".5s" begin=".25s" repeatCount="indefinite" values="M194 208 Q212 240 184 256;M194 208 Q212 240 184 260;M194 208 Q212 240 184 256"/>
+                      </path>
+                      <use href="#botHand" class="hf" transform="translate(116 258)">
+                        <animateTransform attributeName="transform" type="translate" dur=".5s" repeatCount="indefinite" values="116 254;116 258;116 254"/>
+                      </use>
+                      <use href="#botHand" class="hf" transform="translate(184 258) scale(-1 1)">
+                        <animateTransform attributeName="transform" type="translate" dur=".5s" begin=".25s" repeatCount="indefinite" values="184 254;184 258;184 254" additive="replace"/>
+                      </use>
+                    </g>
+                    <g class="act" data-for="fitness">
+                      <path class="arm" d="M106 208 Q64 222 66 252">
+                        <animate attributeName="d" dur="1.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="M106 208 Q64 222 66 252;M106 208 Q58 198 72 176;M106 208 Q64 222 66 252"/>
+                      </path>
+                      <g>
+                        <animateTransform attributeName="transform" type="translate" dur="1.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="66 252;72 176;66 252"/>
+                        <rect class="db-bar" x="-19" y="1.5" width="38" height="3.4" rx="1.7"/>
+                        <rect class="db-pl" x="-23" y="-7" width="8" height="20" rx="3"/>
+                        <rect class="db-pl" x="15" y="-7" width="8" height="20" rx="3"/>
+                        <g><animateTransform attributeName="transform" type="rotate" dur="1.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="0;180;0"/>
+                          <use href="#botHand" class="hf"/></g>
+                      </g>
+                      <path class="arm" d="M194 208 Q236 222 234 252">
+                        <animate attributeName="d" dur="1.5s" begin=".75s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="M194 208 Q236 222 234 252;M194 208 Q242 198 228 176;M194 208 Q236 222 234 252"/>
+                      </path>
+                      <g>
+                        <animateTransform attributeName="transform" type="translate" dur="1.5s" begin=".75s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="234 252;228 176;234 252"/>
+                        <rect class="db-bar" x="-19" y="1.5" width="38" height="3.4" rx="1.7"/>
+                        <rect class="db-pl" x="-23" y="-7" width="8" height="20" rx="3"/>
+                        <rect class="db-pl" x="15" y="-7" width="8" height="20" rx="3"/>
+                        <g><animateTransform attributeName="transform" type="rotate" dur="1.5s" begin=".75s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1" values="0;180;0"/>
+                          <use href="#botHand" class="hf"/></g>
+                      </g>
+                    </g>
+                                        </g>
+                    <g id="botHead">
+                      <rect class="neck" x="133" y="174" width="34" height="20" rx="5"/>
+                      <line class="neckline" x1="135" y1="183" x2="165" y2="183"/>
+                      <g id="botAnt">
+                        <rect class="antbase" x="145" y="58" width="10" height="9" rx="3"/>
+                        <line class="ant" x1="150" y1="60" x2="150" y2="45"/>
+                        <circle class="tip pulse" cx="150" cy="39" r="6" filter="url(#botGlow)"/>
+                        <circle cx="148" cy="37" r="1.8" fill="#fff" opacity=".85"/>
+                      </g>
+                      <rect class="hinge" x="70" y="118" width="10" height="20" rx="3"/>
+                      <rect class="hinge" x="220" y="118" width="10" height="20" rx="3"/>
+                      <rect class="ear" x="56" y="104" width="20" height="50" rx="10"/>
+                      <rect class="earslot" x="62" y="112" width="8" height="34" rx="4"/>
+                      <rect class="earglow pulse" x="64" y="116" width="4" height="26" rx="2"/>
+                      <rect class="ear" x="224" y="104" width="20" height="50" rx="10"/>
+                      <rect class="earslot" x="230" y="112" width="8" height="34" rx="4"/>
+                      <rect class="earglow pulse" x="232" y="116" width="4" height="26" rx="2"/>
+                      <rect class="shell" filter="url(#botDrop)" x="76" y="62" width="148" height="122" rx="54"/>
+                      <rect class="rimhi" x="77.5" y="63.5" width="145" height="119" rx="52.5"/>
+                      <rect class="bezel" x="85" y="71" width="130" height="102" rx="47"/>
+                      <rect class="visor" x="90" y="76" width="120" height="92" rx="42"/>
+                      <rect class="visorrim" x="90" y="76" width="120" height="92" rx="42"/>
+                      <g id="botFace">
+                        <g id="botEyes">
+                          <g class="norm">
+                            <rect class="eye" x="118.5" y="104" width="15" height="26" rx="7.5"/>
+                            <rect class="eye" x="166.5" y="104" width="15" height="26" rx="7.5"/>
+                            <circle class="eye gl" cx="123" cy="110" r="2.4"/>
+                            <circle class="eye gl" cx="171" cy="110" r="2.4"/>
+                          </g>
+                          <g class="tired-only">
+                            <path class="eye tired-eye" d="M118.5 118 H133.5 A7.5 7.5 0 0 1 118.5 118 Z"/>
+                            <path class="eye tired-eye" d="M166.5 118 H181.5 A7.5 7.5 0 0 1 166.5 118 Z"/>
+                            <path class="smile thin" d="M115 118 H137 M163 118 H185"/>
+                          </g>
+                          <g class="happy-only">
+                            <path class="smile" d="M115 122 Q126 106 137 122"/>
+                            <path class="smile" d="M163 122 Q174 106 185 122"/>
+                          </g>
+                        </g>
+                        <path class="smile norm" d="M139 141 Q150 151 161 141"/>
+                        <path class="smile happy-only" d="M134 138 Q150 158 166 138"/>
+                        <g class="act" data-for="study">
+                          <circle class="gl-rim" cx="126" cy="117" r="16"/><circle class="gl-rim" cx="174" cy="117" r="16"/>
+                          <path class="gl-rim" d="M142 115 Q150 110 158 115"/>
+                        </g>
+                        <g class="tired-only">
+                          <ellipse class="yawn" cx="150" cy="145" rx="5" ry="2">
+                            <animate attributeName="ry" dur="7s" repeatCount="indefinite" values="2;2;9;9;2" keyTimes="0;.55;.68;.85;1"/>
+                            <animate attributeName="rx" dur="7s" repeatCount="indefinite" values="5;5;7;7;5" keyTimes="0;.55;.68;.85;1"/>
+                          </ellipse>
+                        </g>
+                        <g class="effort-only">
+                          <rect class="eye" x="118.5" y="113" width="15" height="10" rx="5"/>
+                          <rect class="eye" x="166.5" y="113" width="15" height="10" rx="5"/>
+                          <path class="smile thin" d="M111 103 L137 111 M189 103 L163 111"/>
+                          <g class="grit"><rect class="teeth" x="135" y="137" width="30" height="13" rx="4.5"/>
+                          <path class="teeth-l" d="M142.5 137 V150 M150 137 V150 M157.5 137 V150 M135 143.5 H165"/></g>
+                        </g>
+                        <g class="sick-only">
+                          <path class="smile" d="M114 121 H138 M162 121 H186"/>
+                          <path class="smile thin" d="M113 107 L137 113 M187 107 L163 113"/>
+                          <path class="smile" d="M140 147 q5 -5 10 0 q5 5 10 0"/>
+                        </g>
+                        <g class="sleep-only">
+                          <path class="smile" d="M114 118 Q126 129 138 118"/>
+                          <path class="smile" d="M162 118 Q174 129 186 118"/>
+                          <path class="smile" d="M144 143 Q150 147 156 143"/>
+                        </g>
+                      </g>
+                      <rect class="sheen" x="90" y="76" width="120" height="92" rx="42"/>
+                                            <g class="act" data-for="creativity">
+                        <ellipse class="beret" cx="116" cy="67" rx="33" ry="11" transform="rotate(-12 116 67)"/>
+                        <circle class="beret" cx="102" cy="55" r="3.2"/>
+                      </g>
+                      <g class="act" data-for="social">
+                        <path class="bub" d="M232 46 h30 a9 9 0 0 1 9 9 v6 a9 9 0 0 1 -9 9 h-18 l-9 8 v-8 h-3 a9 9 0 0 1 -9 -9 v-6 a9 9 0 0 1 9 -9 z"/>
+                        <circle class="bub-d" cx="243" cy="58" r="2.6"><animate attributeName="opacity" dur="1.2s" repeatCount="indefinite" values=".25;1;.25"/></circle>
+                        <circle class="bub-d" cx="252" cy="58" r="2.6"><animate attributeName="opacity" dur="1.2s" begin=".2s" repeatCount="indefinite" values=".25;1;.25"/></circle>
+                        <circle class="bub-d" cx="261" cy="58" r="2.6"><animate attributeName="opacity" dur="1.2s" begin=".4s" repeatCount="indefinite" values=".25;1;.25"/></circle>
+                      </g>
+                      <g class="act" data-for="payment">
+                        <text class="cash" font-size="16"><animateTransform attributeName="transform" type="translate" dur="2.4s" repeatCount="indefinite" values="222 78;230 46"/><animate attributeName="opacity" dur="2.4s" repeatCount="indefinite" values="0;1;0"/>$</text>
+                        <text class="cash" font-size="12"><animateTransform attributeName="transform" type="translate" dur="2.4s" begin="1.2s" repeatCount="indefinite" values="68 80;60 50"/><animate attributeName="opacity" dur="2.4s" begin="1.2s" repeatCount="indefinite" values="0;1;0"/>$</text>
+                      </g>
+                      <g class="act" data-for="appointment">
+                        <path class="arm" d="M106 208 Q94 176 138 158"/>
+                        <g><animateTransform attributeName="transform" type="translate" dur=".3s" repeatCount="indefinite" values="0 0;2 -2;0 0"/>
+                          <use href="#botHand" class="hf" transform="translate(147 154) rotate(-90)"/></g>
+                        <circle class="puff" cx="172" cy="150" r="3"><animate attributeName="r" dur="2.2s" repeatCount="indefinite" values="3;3;11;14" keyTimes="0;.62;.8;1"/><animate attributeName="cx" dur="2.2s" repeatCount="indefinite" values="172;172;186;196" keyTimes="0;.62;.8;1"/><animate attributeName="opacity" dur="2.2s" repeatCount="indefinite" values="0;0;.85;0" keyTimes="0;.62;.8;1"/></circle>
+                        <circle class="puff" cx="172" cy="158" r="2"><animate attributeName="r" dur="2.2s" repeatCount="indefinite" values="2;2;8;10" keyTimes="0;.64;.82;1"/><animate attributeName="cx" dur="2.2s" repeatCount="indefinite" values="172;172;184;190" keyTimes="0;.64;.82;1"/><animate attributeName="opacity" dur="2.2s" repeatCount="indefinite" values="0;0;.7;0" keyTimes="0;.64;.82;1"/></circle>
+                        <path class="sweat" d="M0 -6 Q5 1 0 5 Q-5 1 0 -6 Z"><animateTransform attributeName="transform" type="translate" dur="2s" repeatCount="indefinite" values="96 92;98 124"/><animate attributeName="opacity" dur="2s" repeatCount="indefinite" values="0;1;0"/></path>
+                      </g>
+                      <g class="act" data-for="fitness">
+                        <path class="sweat" d="M0 -6 Q5 1 0 5 Q-5 1 0 -6 Z"><animateTransform attributeName="transform" type="translate" dur="1.6s" repeatCount="indefinite" values="214 84;218 128"/><animate attributeName="opacity" dur="1.6s" repeatCount="indefinite" values="0;1;0"/></path>
+                      </g>
+                      <g class="act" data-for="sleep tired">
+                        <text class="zz" font-size="17"><animateTransform attributeName="transform" type="translate" dur="3s" repeatCount="indefinite" values="214 78;226 50"/><animate attributeName="opacity" dur="3s" repeatCount="indefinite" values="0;1;0"/>Z</text>
+                        <text class="zz" font-size="13"><animateTransform attributeName="transform" type="translate" dur="3s" begin="1s" repeatCount="indefinite" values="214 78;226 50"/><animate attributeName="opacity" dur="3s" begin="1s" repeatCount="indefinite" values="0;1;0"/>Z</text>
+                        <text class="zz" font-size="10"><animateTransform attributeName="transform" type="translate" dur="3s" begin="2s" repeatCount="indefinite" values="214 78;226 50"/><animate attributeName="opacity" dur="3s" begin="2s" repeatCount="indefinite" values="0;1;0"/>Z</text>
+                      </g>
+                    </g>
+                  </g></g>
+                </svg>
+              </div>
             </article>
 
             <article class="dcard cycle" id="cCycle">
@@ -200,29 +511,60 @@
         <section class="panel" id="p-todo" role="tabpanel"
           aria-labelledby="t-todo" hidden>
           <h2>To-Do</h2>
-          <form class="row" id="todoForm" novalidate>
-            <label class="grow"><span class="sr">New task</span><input
-                id="todoInput" placeholder="What needs doing?"
-                autocomplete="off" maxlength="200"></label>
-            <button class="btn" type="submit">Add task</button>
-          </form>
-          <p class="err" id="todoErr" role="alert"></p>
-          <ul class="list" id="todoList"></ul>
-          <p class="empty" id="todoEmpty">Nothing to do. Add your first task
-            above.</p>
+          <div class="todo-grid">
+            <article class="tcard" aria-labelledby="tAddH">
+              <h3 id="tAddH">Add task</h3>
+              <form id="todoForm" novalidate>
+                <label><span class="sr">New task</span><input
+                    id="todoInput" placeholder="What needs doing?"
+                    autocomplete="off" maxlength="200"></label>
+                <fieldset class="when">
+                  <legend>When <span class="opt">(optional)</span></legend>
+                  <div class="whenrow">
+                    <label class="rad"><input type="radio" name="todoWhen"
+                        value="today" checked><span>Today</span></label>
+                    <label class="rad"><input type="radio" name="todoWhen"
+                        value="tomorrow"><span>Tomorrow</span></label>
+                    <label class="rad"><input type="radio" name="todoWhen"
+                        value="pick"><span>Pick a date</span></label>
+                  </div>
+                  <input type="date" id="todoDate" aria-label="Task date" hidden>
+                </fieldset>
+                <button class="btn full" type="submit">Add task</button>
+              </form>
+              <p class="err" id="todoErr" role="alert"></p>
+            </article>
+
+            <div class="tcol">
+            <article class="tcard" aria-labelledby="tListH">
+              <div class="thead"><h3 id="tListH">Your tasks</h3><span class="tcount" id="todoCount"></span></div>
+              <ul class="list tlist" id="todoList"></ul>
+              <p class="empty" id="todoEmpty">Nothing to do. Add your first task.</p>
+            </article>
+
+              <article class="tcard" id="cUp" aria-labelledby="tUpH" hidden>
+                <div class="thead"><h3 id="tUpH">Upcoming</h3><span class="tcount" id="upCount"></span></div>
+                <ul class="list tlist" id="upList"></ul>
+              </article>
+            </div>
+          </div>
         </section>
 
         <!-- Reminders -->
         <section class="panel" id="p-reminders" role="tabpanel"
           aria-labelledby="t-reminders" hidden>
           <h2>Task reminders</h2>
+          <div class="rem-grid">
+            <div class="tcol">
+              <article class="tcard" aria-labelledby="rAddH">
+                <h3 id="rAddH">New reminder</h3>
           <form class="grid" id="remForm" novalidate>
             <label class="full">Task<input name="title"
                 placeholder="e.g. Submit project report" autocomplete="off"
                 maxlength="200"><span class="err"></span></label>
             <label>Deadline date<input name="date" type="date"><span
                 class="err"></span></label>
-            <label>Deadline time<input name="time" type="time"><span
+            <label>Deadline time<input name="time" type="time" value="23:59"><span
                 class="err"></span></label>
             <fieldset class="full lead">
               <legend>Remind me before</legend>
@@ -237,74 +579,273 @@
                 deadline.</span>
               <span class="err"></span>
             </fieldset>
+            <fieldset class="full when">
+              <legend>Repeat <span class="opt">(optional)</span></legend>
+              <div class="whenrow">
+                <label class="rad"><input type="radio" name="repeat"
+                    value="none" checked><span>Don't repeat</span></label>
+                <label class="rad"><input type="radio" name="repeat"
+                    value="yearly"><span>Every year</span></label>
+              </div>
+            </fieldset>
             <button class="btn full" type="submit">Set reminder</button>
           </form>
+
           <div class="notice" id="notice" hidden>
             <span id="noticeText"></span>
             <button type="button" class="btn ghost" id="notifyBtn" hidden>Turn
               on notifications</button>
           </div>
-          <ul class="list" id="remList"></ul>
-          <p class="empty" id="remEmpty">No reminders yet. Set a deadline above
-            and Taskly will remind you in time.</p>
+              </article>
+            </div>
+            <article class="tcard mcard" id="remMonth" aria-labelledby="mTitle">
+            <div class="thead"><h3 id="mTitle"></h3><span class="tcount" id="mCount"></span></div>
+            <div class="mcal" id="mCal" role="grid" aria-label="Reminder calendar"></div>
+            <ul class="list tlist" id="mList"></ul>
+            <p class="empty" id="mEmpty">No reminders with a deadline this month.</p>
+          </article>
+          </div>
         </section>
 
         <!-- Schedule -->
         <section class="panel" id="p-schedule" role="tabpanel"
           aria-labelledby="t-schedule" hidden>
-          <h2>Daily schedule</h2>
-          <div class="row daybar">
-            <label class="grow">Day<input type="date" id="schDate"></label>
-            <button type="button" class="btn ghost" id="schToday">Today</button>
-          </div>
-          <form class="grid" id="schForm" novalidate>
-            <label class="full">Work<input name="title"
-                placeholder="e.g. Write project report" autocomplete="off"
-                maxlength="200"><span class="err"></span></label>
-            <label>Start<input name="start" type="time"><span
-                class="err"></span></label>
-            <label>End<input name="end" type="time"><span
-                class="err"></span></label>
-            <button class="btn full" type="submit">Add to schedule</button>
-          </form>
-          <ol class="list timeline" id="schList"></ol>
-          <p class="empty" id="schEmpty">Nothing planned for this day. Add a
-            time block above.</p>
+          <h2>Schedule</h2>
+          <fieldset class="when stype">
+            <legend>Schedule type</legend>
+            <div class="whenrow">
+              <label class="rad"><input type="radio" name="schType"
+                  value="weekly" checked><span>Weekly routine</span></label>
+              <label class="rad"><input type="radio" name="schType"
+                  value="one"><span>Schedule For One Day</span></label>
+            </div>
+          </fieldset>
 
-          <hr class="sdiv">
-          <h3 class="sh3">Weekly routine</h3>
-          <p class="hint">Repeats every week. It appears in today's schedule and on your dashboard.</p>
-          <form class="grid" id="wkForm" novalidate>
-            <label class="full">Routine<input name="title"
-                placeholder="e.g. Gym, Study, Sleep" autocomplete="off"
-                maxlength="200"><span class="err"></span></label>
-            <label>Start<input name="start" type="time"><span
-                class="err"></span></label>
-            <label>End<input name="end" type="time"><span
-                class="err"></span></label>
-            <fieldset class="full days">
-              <legend>Repeat on</legend>
-              <div class="dayrow" id="wkDays"></div>
-              <span class="err" id="wkDaysErr"></span>
+          <!-- Weekly routine -->
+          <div id="schWeekly">
+            <p class="hint">Repeats every week. It appears in today's schedule and on your dashboard.</p>
+            <form class="grid" id="wkForm" novalidate>
+              <label class="full">Routine<input name="title"
+                  placeholder="e.g. Gym, Study, Sleep" autocomplete="off"
+                  maxlength="200"><span class="err"></span></label>
+              <label class="full">Category
+                <select name="cat">
+                  <option value="study">Study</option>
+                  <option value="work">Work</option>
+                  <option value="creativity">Creativity</option>
+                  <option value="fitness">Fitness</option>
+                  <option value="meal">Meal</option>
+                  <option value="household">Household</option>
+                  <option value="social">Family &amp; Social</option>
+                  <option value="payment">Payment</option>
+                  <option value="appointment">Appointment</option>
+                  <option value="event">Event</option>
+                  <option value="sleep">Sleep</option>
+                  <option value="other" selected>Other (default pose)</option>
+                </select><span class="err"></span>
+              </label>
+              <label>Start<input name="start" type="time"><span
+                  class="err"></span></label>
+              <label>End<input name="end" type="time"><span
+                  class="err"></span></label>
+              <fieldset class="full days">
+                <legend>Repeat on</legend>
+                <div class="dayrow" id="wkDays"></div>
+                <span class="err" id="wkDaysErr"></span>
+              </fieldset>
+              <button class="btn full" type="submit">Add to weekly routine</button>
+              <button class="btn ghost full" type="button" id="wkCancel" hidden>Cancel editing</button>
+            </form>
+            <div id="wkList"></div>
+            <p class="empty" id="wkEmpty">No weekly routine yet. Add one above.</p>
+          </div>
+
+          <!-- Schedule for one day -->
+          <div id="schOne" hidden>
+            <fieldset class="when stype">
+              <legend>Schedule by</legend>
+              <div class="whenrow">
+                <label class="rad"><input type="radio" name="oneBy"
+                    value="day" checked><span>Day</span></label>
+                <label class="rad"><input type="radio" name="oneBy"
+                    value="date"><span>Date</span></label>
+              </div>
             </fieldset>
-            <button class="btn full" type="submit">Add to weekly routine</button>
-          </form>
-          <div id="wkList"></div>
-          <p class="empty" id="wkEmpty">No weekly routine yet. Add one above.</p>
+            <p class="hint">Plans one day only. It appears in today's schedule and on your dashboard.</p>
+            <form class="grid" id="oneForm" novalidate>
+              <div class="full" id="oneDayWrap">
+                <label>Day
+                  <select name="day">
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="0">Sunday</option>
+                  </select><span class="err"></span>
+                </label>
+              </div>
+              <div class="full" id="oneDateWrap" hidden>
+                <label>Date<input name="date" type="date"><span
+                    class="err"></span></label>
+              </div>
+              <label class="full">Work<input name="title"
+                  placeholder="e.g. Write project report" autocomplete="off"
+                  maxlength="200"><span class="err"></span></label>
+              <label class="full">Category
+                <select name="cat">
+                  <option value="study">Study</option>
+                  <option value="work">Work</option>
+                  <option value="creativity">Creativity</option>
+                  <option value="fitness">Fitness</option>
+                  <option value="meal">Meal</option>
+                  <option value="household">Household</option>
+                  <option value="social">Family &amp; Social</option>
+                  <option value="payment">Payment</option>
+                  <option value="appointment">Appointment</option>
+                  <option value="event">Event</option>
+                  <option value="sleep">Sleep</option>
+                  <option value="other" selected>Other (default pose)</option>
+                </select><span class="err"></span>
+              </label>
+              <label>Start<input name="start" type="time"><span
+                  class="err"></span></label>
+              <label>End<input name="end" type="time"><span
+                  class="err"></span></label>
+              <button class="btn full" type="submit">Add to schedule</button>
+              <button class="btn ghost full" type="button" id="oneCancel" hidden>Cancel editing</button>
+            </form>
+            <div id="oneList"></div>
+            <p class="empty" id="oneEmpty">No one-day plans coming up. Add one above.</p>
+          </div>
         </section>
 
         <!-- History -->
         <section class="panel" id="p-history" role="tabpanel"
           aria-labelledby="t-history" hidden>
           <h2>History</h2>
-          <ul class="list" id="histList"></ul>
-          <p class="empty" id="histEmpty">Completed tasks show up here, newest
-            first.</p>
+          <div class="hist-grid">
+            <article class="tcard" aria-labelledby="hTodoH">
+              <div class="thead"><h3 id="hTodoH">To-Do history</h3><span class="tcount" id="hTodoCount"></span></div>
+              <ul class="list tlist" id="histList"></ul>
+              <p class="empty" id="histEmpty">Finished and unfinished tasks from
+                past days show up here, newest first.</p>
+            </article>
+            <article class="tcard" aria-labelledby="hRemH">
+              <div class="thead"><h3 id="hRemH">Reminder history</h3><span class="tcount" id="hRemCount"></span></div>
+              <ul class="list tlist" id="remHistList"></ul>
+              <p class="empty" id="remHistEmpty">Reminders you mark as done show
+                up here, newest first.</p>
+            </article>
+          </div>
         </section>
       </div>
     </div>
 
+    <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="rmT" hidden>
+      <div class="modal-box">
+        <h3 id="rmT">A new day has started</h3>
+        <p id="rmMsg"></p>
+        <div class="modal-act">
+          <button type="button" class="btn ghost" id="rmKeep">Keep</button>
+          <button type="button" class="btn" id="rmReset">Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="stT" hidden>
+      <div class="modal-box settings-box">
+        <div class="st-head">
+          <h3 id="stT">Settings</h3>
+          <button type="button" class="st-x" id="stClose" aria-label="Close settings">&times;</button>
+        </div>
+        <div class="st-body">
+          <nav class="st-nav" role="tablist" aria-label="Settings categories" aria-orientation="vertical">
+            <button type="button" role="tab" id="stt-account" aria-controls="sts-account" aria-selected="true" data-cat="account">Account</button>
+            <button type="button" role="tab" id="stt-security" aria-controls="sts-security" aria-selected="false" tabindex="-1" data-cat="security">Security</button>
+            <button type="button" role="tab" id="stt-appearance" aria-controls="sts-appearance" aria-selected="false" tabindex="-1" data-cat="appearance">Appearance</button>
+            <button type="button" role="tab" id="stt-data" aria-controls="sts-data" aria-selected="false" tabindex="-1" data-cat="data">Data</button>
+          </nav>
+          <div class="st-pane">
+        <section class="st-sec" id="sts-account" role="tabpanel" aria-labelledby="stt-account" data-cat="account">
+          <h4>Account</h4>
+          <label class="st-item" for="stName">
+            <span class="st-t"><i>Account:</i> <b>Display name</b></span>
+            <span class="st-d">The name shown in the header and in your dashboard greeting.</span>
+            <input type="text" id="stName" autocomplete="off" maxlength="30" />
+            <span class="err"></span>
+          </label>
+        </section>
+        <section class="st-sec" id="sts-security" role="tabpanel" aria-labelledby="stt-security" data-cat="security" hidden>
+          <h4>Security</h4>
+          <label class="st-item" for="stEmail">
+            <span class="st-t"><i>Security:</i> <b>Email</b></span>
+            <span class="st-d">The email address you use to log in to Taskly.</span>
+            <input type="email" id="stEmail" autocomplete="email" />
+            <span class="err"></span>
+          </label>
+          <label class="st-item" for="stCur">
+            <span class="st-t"><i>Security:</i> <b>Current Password</b></span>
+            <span class="st-d">Required to change your password if you have set one. Leave the password fields empty to keep it as it is.</span>
+            <input type="password" id="stCur" autocomplete="current-password" />
+            <span class="err"></span>
+          </label>
+          <label class="st-item" for="stNew">
+            <span class="st-t"><i>Security:</i> <b>New Password</b></span>
+            <span class="st-d">Use at least 8 characters.</span>
+            <input type="password" id="stNew" autocomplete="new-password" />
+            <span class="err"></span>
+          </label>
+          <label class="st-item" for="stConf">
+            <span class="st-t"><i>Security:</i> <b>Confirm New Password</b></span>
+            <span class="st-d">Type the new password again.</span>
+            <input type="password" id="stConf" autocomplete="new-password" />
+            <span class="err"></span>
+          </label>
+        </section>
+        <section class="st-sec" id="sts-appearance" role="tabpanel" aria-labelledby="stt-appearance" data-cat="appearance" hidden>
+          <h4>Appearance</h4>
+          <label class="st-item" for="stTheme">
+            <span class="st-t"><i>Appearance:</i> <b>Theme</b></span>
+            <span class="st-d">Switches Taskly between the light and dark color themes.</span>
+            <select id="stTheme"><option value="light">Light</option><option value="dark">Dark</option></select>
+            <span class="err"></span>
+          </label>
+          <label class="st-item" for="stFx">
+            <span class="st-t"><i>Appearance:</i> <b>Background Effect</b></span>
+            <span class="st-d">Animated glow and ring in light mode, and the moving network in dark mode.</span>
+            <select id="stFx"><option value="off">Off</option><option value="on">On</option></select>
+            <span class="err"></span>
+          </label>
+          <label class="st-item" for="stClock">
+            <span class="st-t"><i>Appearance:</i> <b>Clock Format</b></span>
+            <span class="st-d">Controls how the time is shown on the dashboard clock.</span>
+            <select id="stClock"><option value="12">12-hour</option><option value="24">24-hour</option></select>
+            <span class="err"></span>
+          </label>
+        </section>
+        <section class="st-sec" id="sts-data" role="tabpanel" aria-labelledby="stt-data" data-cat="data" hidden>
+          <h4>Data</h4>
+          <div class="st-item">
+            <span class="st-t"><i>Data:</i> <b>Clear All Data</b></span>
+            <span class="st-d">Deletes every task, reminder, schedule entry and history item stored in this browser. This cannot be undone.</span>
+            <button type="button" class="btn ghost small" id="stClear">Clear data</button>
+          </div>
+        </section>
+          </div>
+        </div>
+        <div class="modal-act st-foot" id="stFoot" hidden>
+          <button type="button" class="btn ghost" id="stCancel">Cancel</button>
+          <button type="button" class="btn" id="stSave">Save</button>
+        </div>
+      </div>
+    </div>
     <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
-    <script src="js/app.js?v=15"></script>
+    <script src="js/store.js?v=1"></script>
+    <script src="js/support.js?v=1"></script>
+    <script src="js/plexus.js?v=3"></script>
+    <script src="js/bokeh.js?v=1"></script>
+    <script src="js/app.js?v=25"></script>
+    <script src="js/robot.js?v=7"></script>
   </body>
 </html>

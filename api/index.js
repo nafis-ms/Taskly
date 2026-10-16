@@ -1,0 +1,111 @@
+/**
+ * Taskly feedback API (Vercel serverless function) -> route: /api
+ * Stores feedback in Supabase (table: taskly_feedback), same pattern as the portfolio inbox.
+ *
+ * Env vars (Vercel > Settings > Environment Variables):
+ *   SUPABASE_URL                e.g. https://xxxx.supabase.co
+ *   SUPABASE_SERVICE_ROLE_KEY   server-side only, never put it in front-end code
+ *   ADMIN_PASSWORD              the password you use for admin.html
+ *
+ *   POST   /api            public   submit feedback {email,name,rating,text}
+ *   GET    /api            admin    list all feedback
+ *   PATCH  /api?id=ID      admin    mark as "kept"
+ *   DELETE /api?id=ID      admin    remove
+ * Admin requests send the header:  x-admin-key: <ADMIN_PASSWORD>
+ */
+const crypto = require("crypto");
+
+const URL_BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const TABLE = "taskly_feedback";
+
+const json = (res, code, body) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.end(JSON.stringify(body));
+};
+
+function isAdmin(req) {
+  const given = String(req.headers["x-admin-key"] || "");
+  const real = process.env.ADMIN_PASSWORD || "";
+  if (!real || !given) return false;
+  const a = crypto.createHash("sha256").update(given).digest();
+  const b = crypto.createHash("sha256").update(real).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
+async function sb(path, opts = {}) {
+  const r = await fetch(`${URL_BASE}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      apikey: KEY,
+      Authorization: `Bearer ${KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      ...(opts.headers || {}),
+    },
+  });
+  const text = await r.text();
+  if (!r.ok) throw new Error(text || `Supabase ${r.status}`);
+  return text ? JSON.parse(text) : [];
+}
+
+const clean = (s, n) => String(s || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
+const toClient = (x) => ({
+  id: String(x.id),
+  email: x.email,
+  name: x.name,
+  rating: x.rating,
+  text: x.text,
+  ts: new Date(x.created_at).getTime(),
+  status: x.status,
+});
+
+module.exports = async (req, res) => {
+  if (!URL_BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
+  try {
+    if (req.method === "POST") {
+      let b = req.body;
+      if (typeof b === "string") { try { b = JSON.parse(b); } catch (e) { b = {}; } }
+      b = b || {};
+      const text = clean(b.text, 600);
+      const rating = Math.min(5, Math.max(1, parseInt(b.rating, 10) || 5));
+      if (!text) return json(res, 400, { error: "Feedback text is required" });
+      const rows = await sb(TABLE, {
+        method: "POST",
+        body: JSON.stringify({
+          email: clean(b.email, 120),
+          name: clean(b.name, 60) || "Anonymous",
+          rating,
+          text,
+          status: "pending",
+        }),
+      });
+      return json(res, 201, { ok: true, item: toClient(rows[0]) });
+    }
+
+    if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
+
+    if (req.method === "GET") {
+      const rows = await sb(`${TABLE}?select=*&order=created_at.asc`);
+      return json(res, 200, { items: rows.map(toClient) });
+    }
+
+    const id = String((req.query && req.query.id) || "").replace(/[^0-9a-f-]/gi, "");
+    if (!id) return json(res, 400, { error: "Missing id" });
+
+    if (req.method === "PATCH") {
+      await sb(`${TABLE}?id=eq.${id}`, { method: "PATCH", body: JSON.stringify({ status: "kept" }) });
+      return json(res, 200, { ok: true });
+    }
+    if (req.method === "DELETE") {
+      await sb(`${TABLE}?id=eq.${id}`, { method: "DELETE" });
+      return json(res, 200, { ok: true });
+    }
+    res.setHeader("Allow", "GET, POST, PATCH, DELETE");
+    return json(res, 405, { error: "Method not allowed" });
+  } catch (e) {
+    return json(res, 500, { error: "Request failed" });
+  }
+};
