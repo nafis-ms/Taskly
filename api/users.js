@@ -7,6 +7,8 @@
 const crypto = require("crypto");
 const BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+/* legacy service_role keys are JWTs (eyJ...) and go in Authorization too; new sb_secret_ keys must only be sent as apikey */
+const AUTH = /^eyJ/.test(KEY) ? { Authorization: `Bearer ${KEY}` } : {};
 const json = (res, code, body) => {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json");
@@ -21,7 +23,7 @@ function isAdmin(req) {
   const b = crypto.createHash("sha256").update(real).digest();
   return crypto.timingSafeEqual(a, b);
 }
-const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+const H = { apikey: KEY, ...AUTH, "Content-Type": "application/json" };
 
 module.exports = async (req, res) => {
   if (!BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
@@ -32,7 +34,10 @@ module.exports = async (req, res) => {
         fetch(`${BASE}/auth/v1/admin/users?per_page=1000`, { headers: H }),
         fetch(`${BASE}/rest/v1/taskly_data?select=user_id,data`, { headers: H }),
       ]);
-      if (!ur.ok) return json(res, 500, { error: "Could not list users" });
+      if (!ur.ok) {
+        const why = await ur.text().catch(() => "");
+        return json(res, 500, { error: "Could not list users", detail: `Supabase ${ur.status}: ${why.slice(0, 200)}` });
+      }
       const users = (await ur.json()).users || [];
       const rows = dr.ok ? await dr.json() : [];
       const stats = {};
