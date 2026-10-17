@@ -175,7 +175,7 @@ html:root[data-theme="dark"] body::after{content:"";position:fixed;inset:0;z-ind
 html:root body .hero h1 .rot{text-shadow:none!important}
 html:root:not([data-theme="dark"]) body .hero h1 .rot{font-weight:800}
 
-/* Fixed navbar + tighter spacing between navbar and hero */
+/* Fixed navbar */
 html:root body .nav{
   position:fixed;
   top:calc(env(safe-area-inset-top,0px) + 30px);
@@ -183,11 +183,38 @@ html:root body .nav{
   right:0;
   margin:0 auto;
 }
-html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 190px)}
-html:root body .hero{min-height:0;padding-top:0;padding-bottom:30px}
+
+/* Phones: regular free scrolling, smooth */
 @media (max-width:767px){
+  html:root{scroll-behavior:smooth;scroll-snap-type:none}
   html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
+  html:root body .hero{min-height:0;padding-top:0;padding-bottom:30px}
 }
 
-/* One section at a time: Home shows only the hero */
-html.views .main > section:not(.on){display:none}
+/* Desktop: section-by-section scrolling, each section fills the screen and snaps into place */
+@media (min-width:768px){
+  html:root{scroll-snap-type:y mandatory;scroll-padding-top:0}
+  html:root body .page:has(> .nav){overflow:clip}
+  html:root body .main{padding-top:0;padding-bottom:0;gap:0}
+  html:root body .main > section{
+    min-height:100vh;
+    min-height:100svh;
+    box-sizing:border-box;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    scroll-margin-top:0;
+  }
+  html:root body .hero{
+    align-content:start;
+    padding-top:calc(env(safe-area-inset-top,0px) + 190px);
+    padding-bottom:60px;
+  }
+  html:root body .sec{
+    justify-content:center;
+    padding-top:calc(env(safe-area-inset-top,0px) + 130px);
+    padding-bottom:60px;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html:root{scroll-snap-type:none;scroll-behavior:auto}
+}
