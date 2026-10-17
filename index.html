@@ -24,7 +24,7 @@
     />
     <link rel="stylesheet" href="css/style.css?v=12" />
     <link rel="stylesheet" href="css/theme.css?v=13" />
-    <link rel="stylesheet" href="css/premium.css?v=2" />
+    <link rel="stylesheet" href="css/premium.css?v=3" />
   </head>
   <body>
     <div class="pp-intro" id="ppIntro" aria-hidden="true"><i></i><b>Taskly</b><i></i></div>
@@ -389,6 +389,12 @@
               <div class="count"><span id="fbcount">0</span> / 1000</div>
               <button class="submit" type="submit">Send feedback</button>
               <p class="ok" id="fbstatus" role="status"></p>
+              <div class="fbdone" id="fbdone" aria-live="polite">
+                <svg class="fbdone-ic" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="37" /><path d="M25 41l10 10 21-22" /></svg>
+                <h3>Thank you!</h3>
+                <p>Your feedback was sent. It will appear in the slideshow once it's approved.</p>
+                <button type="button" class="fbdone-btn" id="fbagain">Send another</button>
+              </div>
             </form>
 
             <div class="card fbview" id="fbview">
@@ -537,7 +543,7 @@
       </div>
     </div>
     <script src="js/store.js?v=1"></script>
-    <script src="js/script.js?v=20"></script>
+    <script src="js/script.js?v=21"></script>
     <script src="js/premium.js?v=1" defer></script>
     <script src="js/plexus.js?v=2"></script>
   </body>
