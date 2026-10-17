@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="css/style.css?v=12" />
     <link rel="stylesheet" href="css/theme.css?v=13" />
     <link rel="stylesheet" href="css/premium.css?v=3" />
+    <link rel="stylesheet" href="css/chat.css?v=1" />
   </head>
   <body>
     <div class="pp-intro" id="ppIntro" aria-hidden="true"><i></i><b>Taskly</b><i></i></div>
@@ -424,8 +425,8 @@
           <div class="contact">
             <div class="cinfo">
               <p class="lede">
-                Questions, feedback or a demo request? Send a message and we'll
-                reply within one business day.
+                Questions, feedback or a demo request? Send a message and a live
+                chat window opens so our team can reply to you right here.
               </p>
               <p>
                 <b>Email</b><br /><a href="mailto:hello@taskly.example"
@@ -449,6 +450,7 @@
                 >Message<textarea name="cm" rows="4"></textarea
                 ><span class="err"></span
               ></label>
+              <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
               <button class="submit" type="submit">Send message</button>
               <p class="ok" id="cstatus" role="status"></p>
             </form>
@@ -543,8 +545,9 @@
       </div>
     </div>
     <script src="js/store.js?v=1"></script>
-    <script src="js/script.js?v=21"></script>
+    <script src="js/script.js?v=22"></script>
     <script src="js/premium.js?v=1" defer></script>
     <script src="js/plexus.js?v=2"></script>
+    <script src="js/chat.js?v=1"></script>
   </body>
 </html>
