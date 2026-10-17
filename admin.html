@@ -91,7 +91,7 @@ document.querySelectorAll("[data-i]").forEach(function(b){b.insertAdjacentHTML("
 $("th").innerHTML=ic("moon","mn")+ic("sun","su");$("lg").innerHTML=$("lg2").innerHTML=ic("bolt");
 $("th").onclick=function(){var d=document.documentElement,t=d.dataset.theme==="dark"?"light":"dark";d.dataset.theme=t;localStorage.setItem("taskly:admintheme",t)};
 function countUp(){document.querySelectorAll("[data-n]").forEach(function(e){var n=+e.dataset.n,t0=performance.now();(function f(t){var p=Math.min((t-t0)/900,1);e.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(t0)})}
-var shown="";
+var shown="",fe="";
 var ok=sessionStorage.getItem("taskly:adm")==="1";
 function gate(){$("login").hidden=ok;$("app").hidden=!ok;$("lmsg").textContent="Enter the admin password.";$("lgo").textContent="Log in";if(ok)draw()}
 $("login").onsubmit=function(e){e.preventDefault();var p=$("lpw").value;if(!p)return $("lerr").textContent="Enter the password.";
@@ -141,14 +141,15 @@ function ch(){var c=S.chat(),ac=S.accounts(),ks=Object.keys(ac).concat(Object.ke
 function fb(){var a=S.feedback().slice().reverse(),T=[["pending","Pending"],["kept","Kept (in slideshow)"],["rejected","Rejected Feedback"]];
  if(!T.some(function(t){return t[0]===f}))f="pending";
  var cnt=function(s){return a.filter(function(x){return x.status===s}).length},list=a.filter(function(x){return x.status===f});
- $("main").innerHTML='<h1>Feedback</h1><div class="c" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center"><b style="width:100%">Add feedback to the slideshow</b><input id="an" placeholder="Name" maxlength="60"><select id="ar"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><input id="at" placeholder="Feedback text (max 1000)" maxlength="1000" style="flex:1;min-width:220px"><button class="btn p" id="aa">Add</button><span id="am"></span></div><div class="top">'+T.map(function(t){return'<button class="btn'+(t[0]===f?" p":"")+'" data-f="'+t[0]+'">'+t[1]+' ('+cnt(t[0])+')</button>'}).join("")+'</div>'
+ $("main").innerHTML='<h1>Feedback</h1><div class="c" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center"><b style="width:100%">Add feedback to the slideshow</b><input id="an" placeholder="Name" maxlength="60"><select id="ar"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><input id="at" placeholder="Feedback text (max 1000)" maxlength="1000" style="flex:1;min-width:220px"><button class="btn p" id="aa">Add</button><span id="am"></span></div><div class="top">'+T.map(function(t){return'<button class="btn'+(t[0]===f?" p":"")+'" data-f="'+t[0]+'">'+t[1]+' ('+cnt(t[0])+')</button>'}).join("")+'</div>'+(fe?'<p style="color:#e5484d;margin:0 0 12px">'+h(fe)+'</p>':'')
  +list.map(function(x){var st=x.status;return'<div class="c" style="margin-bottom:10px"><b>'+h(x.name)+'</b> <small>'+(x.email?h(x.email)+' · ':'')+new Date(x.ts).toLocaleDateString()+'</small> <span class="tag '+(st==="kept"?"on-t":st==="rejected"?"red":"")+'">'+st+'</span><div style="color:#f5c542">'+"★".repeat(x.rating)+"☆".repeat(5-x.rating)+'</div><p>'+h(x.text)+'</p>'
   +(st!=="kept"?'<button class="btn p" data-k="'+x.id+'">Keep</button> ':'')+(st!=="rejected"?'<button class="btn d" data-x="'+x.id+'">Reject</button>':'<button class="btn d" data-r="'+x.id+'">Delete forever</button>')+'</div>'}).join("")+(list.length?"":"<p>Nothing here.</p>");
- var done=function(){fb();draw()};
- document.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){f=b.dataset.f;fb()}});
- document.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){S.feedbackAct(b.dataset.k,"PATCH",done,"kept")}});
- document.querySelectorAll("[data-x]").forEach(function(b){b.onclick=function(){S.feedbackAct(b.dataset.x,"PATCH",done,"rejected")}});
- document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){if(!confirm("Delete this feedback permanently?"))return;S.feedbackAct(b.dataset.r,"DELETE",done)}});
+ var done=function(){fe="";fb();draw()};
+ var act=function(b,id,method,st){b.disabled=true;fe="";S.feedbackAct(id,method,function(g,m){if(g!==false)return done();fe="Could not update feedback: "+(m||"unknown error");fb()},st)};
+ document.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){f=b.dataset.f;fe="";fb()}});
+ document.querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){act(b,b.dataset.k,"PATCH","kept")}});
+ document.querySelectorAll("[data-x]").forEach(function(b){b.onclick=function(){act(b,b.dataset.x,"PATCH","rejected")}});
+ document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){if(!confirm("Delete this feedback permanently?"))return;act(b,b.dataset.r,"DELETE")}});
  $("aa").onclick=function(){var m=$("am"),t=$("at").value.trim();if(t.length<3)return m.textContent="Write the feedback text.";m.textContent="Adding…";
   S.adminAddFeedback($("an").value.trim(),+$("ar").value,t,function(g){if(g)return done();m.textContent="Could not add it. Try again."})}}
 function sett(){$("main").innerHTML='<h1>Settings</h1><div class="c" style="max-width:420px;display:flex;flex-direction:column;gap:10px"><b>Admin password</b><small>Set in Vercel as ADMIN_PASSWORD. To change it, update it there and redeploy.</small></div><div class="c" style="max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:10px"><b>Backup</b><button class="btn" id="bk">Download all Taskly data (JSON)</button></div>';
