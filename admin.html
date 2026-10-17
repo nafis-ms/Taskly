@@ -132,9 +132,9 @@ function us(){var q=($("q")||{}).value||"",fl=($("fl")||{}).value||"all",n=Date.
   var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([r.map(function(x){return x.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(",")}).join("\n")],{type:"text/csv"}));l.download="taskly-users.csv";l.click()};
  document.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){var e=b.dataset.e,k=e.toLowerCase(),ac=S.accounts(),t=b.dataset.a;
   if(t==="m"){cur=k;v="ch";return draw()}
-  if(t==="s"){ac[k].suspended=!ac[k].suspended;S.saveAccounts(ac)}
-  if(t==="p"){if(!confirm("Remove the saved password for "+e+"? They can log in and set a new one."))return;var pw=S.get("taskly:pw",{});delete pw[k];S.set("taskly:pw",pw)}
-  if(t==="x"){if(!confirm("Delete "+e+" and their messages?"))return;delete ac[k];S.saveAccounts(ac);var c=S.chat();delete c[k];S.set("taskly:chat",c);var pw2=S.get("taskly:pw",{});delete pw2[k];S.set("taskly:pw",pw2)}
+  if(t==="s"){return S.accountAct(ac[k].id,ac[k].suspended?"unban":"ban",function(ok,m){if(!ok)alert(m);us()})}
+  if(t==="p"){if(!confirm("Send a password reset email to "+e+"?"))return;return S.accountAct(ac[k].id,"reset",function(ok,m){alert(ok?"Reset email sent.":m)})}
+  if(t==="x"){if(!confirm("Permanently delete "+e+" and their data?"))return;return S.accountAct(ac[k].id,"delete",function(ok,m){if(!ok)alert(m);us()})}
   us()}})}
 function ch(){var c=S.chat(),ac=S.accounts(),ks=Object.keys(ac).concat(Object.keys(c).filter(function(k){return!ac[k]}));
  ks.sort(function(a,b){var x=(c[a]||[]).slice(-1)[0],y=(c[b]||[]).slice(-1)[0];return(y?y.ts:0)-(x?x.ts:0)});if(!cur&&ks.length)cur=ks[0];
