@@ -54,6 +54,14 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
 .ms{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px}.ms div{max-width:72%;padding:9px 15px;border-radius:20px 20px 20px 6px;background:var(--chip);animation:rise .3s both}.ms .a{align-self:flex-end;border-radius:20px 20px 6px 20px;background:var(--acc);color:var(--ai)}
 .row{display:flex;gap:8px;padding:12px}.row input{flex:1;border-radius:999px}
 @media(max-width:860px){#app{grid-template-columns:1fr;margin:0;border-radius:0}.side{padding:14px}nav{flex-direction:row;overflow:auto}.me{display:none}main{padding:20px 14px}.chat{grid-template-columns:1fr;height:auto}}
+.lcw{height:70vh}
+.lci{min-width:0;flex:1}.lci b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lci small{display:block;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lcrt{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:10px;font-size:11px;color:var(--mut);flex:none}.lcrt .u{background:var(--red);color:#fff;border-radius:10px;padding:0 7px;animation:rise .4s both}
+.lcdot{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:var(--green)}.lcdot.x{background:var(--b3)}
+.lce{margin:auto;color:var(--mut)}.lcerr{color:var(--red);padding:0 16px 6px;font-size:12px}.lcerr:empty{display:none}
+.ms .lt{display:block;white-space:pre-wrap;word-break:break-word}.ms small{display:block;margin-top:3px;font-size:10.5px;opacity:.65;text-align:right}
+.ms .ty{display:flex;gap:5px;align-self:flex-start;padding:12px 15px}.ms .ty[hidden]{display:none}.ms .ty i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:lcdot 1.1s ease-in-out infinite}.ms .ty i:nth-child(2){animation-delay:.15s}.ms .ty i:nth-child(3){animation-delay:.3s}
+@keyframes lcdot{0%,60%,100%{transform:none;opacity:.45}30%{transform:translateY(-6px);opacity:1}}
 @media(prefers-reduced-motion:reduce){*,:after{animation:none!important;transition:none!important}}
 </style></head><body>
         <button class="tb" id="th"
@@ -73,7 +81,7 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
                         class="on">Dashboard</button><button data-v="us"
                         data-i="users">Users</button><button data-v="ch"
                         data-i="chat">Chat<b id="nc" hidden></b></button><button
-                        data-v="fb" data-i="star">Feedback<b id="nf"
+                        data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="fb" data-i="star">Feedback<b id="nf"
                             hidden></b></button><button data-v="st"
                         data-i="gear">Settings</button><button id="out"
                         data-i="out">Log out</button></nav>
@@ -109,7 +117,7 @@ function draw(){document.querySelectorAll("nav [data-v]").forEach(function(b){b.
  var u=unreadAll(),p=S.feedback().filter(function(x){return x.status==="pending"}).length;
  $("nc").hidden=!u;$("nc").textContent=u;$("nf").hidden=!p;$("nf").textContent=p;
  if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.id!=="")return;
- var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,fb:fb,st:sett})[v]();if(first)countUp()}
+ var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,st:sett})[v]();if(first)countUp()}
 function ov(){var s=stats(),days=[],i;for(i=13;i>=0;i--){var d=S.day(Date.now()-i*864e5);days.push([d.slice(5),s.a.filter(function(u){return S.day(u.created)===d}).length,s.a.filter(function(u){return u.days.indexOf(d)>-1}).length])}
  var mx=Math.max.apply(0,days.map(function(x){return Math.max(x[1],x[2])}).concat(1));
  function bars(k,l,cl){return'<div class="c ch"><div class="ct"><h3>'+l+'</h3><span class="lg">Last 14 days</span></div><div class="bars">'+days.map(function(x,j){return'<div class="'+cl+'" style="--i:'+j+';height:'+Math.max(x[k]/mx*100,4)+'%" data-t="'+x[0]+' · '+x[k]+'"></div>'}).join("")+'</div><div class="xl">'+days.map(function(x){return'<i>'+x[0].slice(3)+'</i>'}).join("")+'</div></div>'}
@@ -154,5 +162,52 @@ function fb(){var a=S.feedback().slice().reverse(),T=[["pending","Pending"],["ke
   S.adminAddFeedback($("an").value.trim(),+$("ar").value,t,function(g){if(g)return done();m.textContent="Could not add it. Try again."})}}
 function sett(){$("main").innerHTML='<h1>Settings</h1><div class="c" style="max-width:420px;display:flex;flex-direction:column;gap:10px"><b>Admin password</b><small>Set in Vercel as ADMIN_PASSWORD. To change it, update it there and redeploy.</small></div><div class="c" style="max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:10px"><b>Backup</b><button class="btn" id="bk">Download all Taskly data (JSON)</button></div>';
  $("bk").onclick=function(){var o={};["taskly:accounts","taskly:chat","taskly:feedback"].forEach(function(k){o[k]=S.get(k,null)});var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:"application/json"}));l.download="taskly-backup.json";l.click()}}
+/* ---------- Contact Chat: live conversations from the Contact us form (server-backed, no localStorage) ---------- */
+var L={sel:"",chats:[],ids:{},last:"",status:"open",unseen:0,lastTot:0,ac:null,err:"",ping:0};
+function A(m,qs,b){var o={method:m,cache:"no-store",headers:{"x-admin-key":S.adminKey()}};if(b){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(b)}
+ return fetch("/api/chat"+(qs||""),o).then(function(r){return r.json().catch(function(){return{}}).then(function(d){if(!r.ok){var e=new Error(d.detail||d.error||"Server error "+r.status);e.status=r.status;throw e}return d})})}
+function lcMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The chat tables were not found. Run the chat SQL setup in Supabase, then reload this page.":m}
+function lcErr(m){var e=$("lcerr");if(e)e.textContent=m?lcMsg(m):""}
+document.addEventListener("click",function(){try{L.ac=L.ac||new(window.AudioContext||window.webkitAudioContext)();if(L.ac.state==="suspended")L.ac.resume()}catch(e){}});
+function lcChime(){if(!L.ac||L.ac.state!=="running")return;try{var t=L.ac.currentTime;[[660,0],[880,.12]].forEach(function(n){var o=L.ac.createOscillator(),g=L.ac.createGain(),a=t+n[1];o.type="sine";o.frequency.value=n[0];g.gain.setValueAtTime(.0001,a);g.gain.linearRampToValueAtTime(.06,a+.02);g.gain.exponentialRampToValueAtTime(.0001,a+.4);o.connect(g);g.connect(L.ac.destination);o.start(a);o.stop(a+.45)})}catch(e){}}
+function hm(ts){try{return new Date(ts).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}catch(e){return""}}
+function lc(){
+ if($("lcw"))return;
+ $("main").innerHTML='<h1>Contact Chat</h1><p class="sub">Live conversations from the Contact us form. Your replies appear instantly in the visitor\'s chat window.</p><div class="chat lcw" id="lcw"><div id="lcl" style="overflow:auto"></div><div id="lcp"><div class="lce">Select a conversation</div></div></div>';
+ lcList();if(L.sel)lcOpen(L.sel);lcPoll()}
+function lcList(){var l=$("lcl");if(!l)return;var sc=l.scrollTop;
+ l.innerHTML=L.chats.map(function(c){var u=c.id===L.sel?0:c.unread;return'<div class="th'+(c.id===L.sel?" on":"")+'" data-c="'+h(c.id)+'"><div class="lci"><b><span class="lcdot'+(c.status==="closed"?" x":"")+'"></span>'+h(c.name||"Visitor")+'</b><small>'+(c.typing?"typing…":(c.lastFrom==="admin"?"You: ":"")+h(c.last))+'</small></div><div class="lcrt"><span>'+ago(c.lastAt)+'</span>'+(u?'<span class="u">'+u+'</span>':"")+'</div></div>'}).join("")||'<p style="padding:14px;color:var(--mut)">'+(L.err?h(lcMsg(L.err)):"No conversations yet. They appear here when a visitor sends a message from the Contact us form.")+'</p>';
+ l.scrollTop=sc;l.querySelectorAll("[data-c]").forEach(function(t){t.onclick=function(){lcOpen(t.dataset.c)}})}
+function lcOpen(id){L.sel=id;L.ids={};L.last="";L.unseen=0;var c=L.chats.filter(function(x){return x.id===id})[0]||{};
+ $("lcp").innerHTML='<div class="th" style="cursor:default"><div class="lci"><b id="lcn">'+h(c.name||"")+'</b><small>'+h(c.email||"")+'</small></div><div style="display:flex;gap:8px;flex:none"><button class="btn" id="lcs">'+(c.status==="closed"?"Reopen":"Mark resolved")+'</button><button class="btn d" id="lcd">Delete</button></div></div><div class="ms" id="lcb"><div class="ty" id="lct" hidden><i></i><i></i><i></i></div></div><div class="lcerr" id="lcerr"></div><div class="row"><input id="lcin" placeholder="Reply…" maxlength="1000" autocomplete="off"><button class="btn p" id="lcsend">Send</button></div>';
+ $("lcsend").onclick=lcSend;
+ $("lcin").onkeydown=function(e){if(e.key==="Enter"&&!e.isComposing)lcSend()};
+ $("lcin").oninput=function(){var n=Date.now();if(n-L.ping<3000)return;L.ping=n;A("POST","",{action:"atyping",id:L.sel}).catch(function(){})};
+ $("lcs").onclick=function(){A("PATCH","?id="+encodeURIComponent(L.sel)+"&status="+(L.status==="closed"?"open":"closed")).then(function(){lcPoll();lcMsgs()}).catch(function(e){lcErr(e.message)})};
+ $("lcd").onclick=function(){if(!confirm("Delete this conversation and all its messages permanently?"))return;A("DELETE","?id="+encodeURIComponent(L.sel)).then(function(){L.sel="";$("lcp").innerHTML='<div class="lce">Select a conversation</div>';lcPoll()}).catch(function(e){lcErr(e.message)})};
+ lcList();lcMsgs(true);$("lcin").focus()}
+function lcAdd(m,anim){var b=$("lcb"),d=document.createElement("div"),t=document.createElement("span"),s=document.createElement("small");
+ d.className=m.from==="admin"?"a":"";d.dataset.ts=m.ts;d.dataset.t=hm(m.ts);d.dataset.f=m.from;if(!anim)d.style.animation="none";
+ t.className="lt";t.textContent=m.text;s.className="lm";s.textContent=hm(m.ts);d.appendChild(t);d.appendChild(s);
+ var ref=null,l=b.querySelectorAll(".ms>div:not(.ty)"),i;for(i=l.length-1;i>=0;i--){if(+l[i].dataset.ts<=m.ts)break;ref=l[i]}
+ b.insertBefore(d,ref||$("lct"))}
+function lcSeen(){var l=[].filter.call($("lcb").querySelectorAll(".ms>div:not(.ty)"),function(e){return e.dataset.f==="admin"});
+ l.forEach(function(e,i){e.querySelector("small").textContent=e.dataset.t+(i<l.length-L.unseen?" · Seen":"")})}
+function lcMsgs(initial){var id=L.sel;if(!id||!$("lcb"))return Promise.resolve();
+ return A("GET","?admin=1&id="+encodeURIComponent(id)+(L.last?"&after="+encodeURIComponent(L.last):"")+"&open=1").then(function(d){
+  if(L.sel!==id||!$("lcb"))return;var b=$("lcb"),stick=b.scrollHeight-b.scrollTop-b.clientHeight<90,add=false,vis=false;
+  L.status=d.chat.status;L.unseen=d.chat.unseen||0;lcErr("");
+  if($("lcs"))$("lcs").textContent=L.status==="closed"?"Reopen":"Mark resolved";
+  d.messages.forEach(function(m){L.last=m.at;if(L.ids[m.id])return;L.ids[m.id]=1;lcAdd(m,!initial);add=true;if(m.from==="visitor")vis=true});
+  var ty=$("lct");ty.hidden=!d.chat.typing;if(d.chat.typing)b.appendChild(ty);
+  lcSeen();if(add&&(initial||stick||vis)||d.chat.typing&&stick)b.scrollTop=b.scrollHeight;
+  if(vis&&!initial)lcChime()}).catch(function(e){if(e.status===404){L.sel="";if($("lcp"))$("lcp").innerHTML='<div class="lce">That conversation no longer exists.</div>';lcPoll()}else lcErr(e.message)})}
+function lcSend(){var i=$("lcin"),t=i.value.trim(),id=L.sel;if(!t||!id)return;i.value="";lcErr("");
+ A("POST","",{action:"reply",id:id,text:t}).then(function(d){if(L.sel===id&&$("lcb")&&d.message&&!L.ids[d.message.id]){L.ids[d.message.id]=1;lcAdd(d.message,true);$("lcb").scrollTop=$("lcb").scrollHeight}lcPoll()}).catch(function(e){if(L.sel===id)i.value=t;lcErr(e.message)})}
+function lcPoll(){return A("GET","?admin=1").then(function(d){L.err="";L.chats=d.chats||[];var tot=0;
+ L.chats.forEach(function(c){if(!(v==="lc"&&c.id===L.sel))tot+=c.unread});
+ $("nl").hidden=!tot;$("nl").textContent=tot;document.title=(tot?"("+tot+") ":"")+"Taskly Admin";
+ if(tot>L.lastTot)lcChime();L.lastTot=tot;if(v==="lc"&&$("lcl"))lcList()}).catch(function(e){if(e.status!==401){L.err=e.message;if(v==="lc"&&$("lcl")&&!L.chats.length)lcList()}})}
+setInterval(function(){if(ok)lcPoll()},3000);setInterval(function(){if(ok&&v==="lc"&&L.sel)lcMsgs()},2000);
 addEventListener("storage",function(){if(ok)draw()});setInterval(function(){if(ok)S.pullFeedback()},15000);setInterval(function(){if(ok)draw()},5000);if(ok)S.pullFeedback(draw);gate();
 </script></body></html>
