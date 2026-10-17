@@ -15,33 +15,37 @@
   burger.onclick = function () {
     menu(mm.hidden);
   };
+  /* single-view navigation: only the chosen section is shown (Home = hero only) */
+  var VIEWS = ["home", "features", "about", "contact"];
+  document.documentElement.classList.add("views");
+  function show(id, push) {
+    if (VIEWS.indexOf(id) < 0) id = "home";
+    VIEWS.forEach(function (v) {
+      document.getElementById(v).classList.toggle("on", v === id);
+    });
+    $$(".links a").forEach(function (a) {
+      a.setAttribute("aria-current", a.getAttribute("href") === "#" + id);
+    });
+    menu(false);
+    if (push !== false && location.hash !== "#" + id) {
+      history.pushState(null, "", "#" + id);
+    }
+    window.scrollTo(0, 0);
+  }
   $$('a[href^="#"]:not([data-open])').forEach(function (a) {
     a.addEventListener("click", function (e) {
-      var t = $(a.getAttribute("href"));
-      if (!t) return;
+      var id = (a.getAttribute("href") || "").slice(1) || "home";
+      if (VIEWS.indexOf(id) < 0) return;
       e.preventDefault();
-      menu(false);
-      t.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+      show(id);
     });
   });
-  var spy = new IntersectionObserver(
-    function (es) {
-      es.forEach(function (en) {
-        if (en.isIntersecting) {
-          $$(".links a").forEach(function (a) {
-            a.setAttribute(
-              "aria-current",
-              a.getAttribute("href") === "#" + en.target.id,
-            );
-          });
-        }
-      });
-    },
-    { rootMargin: "-40% 0px -55% 0px" },
-  );
-  ["home", "features", "about", "contact"].forEach(function (id) {
-    spy.observe(document.getElementById(id));
-  });
+  function fromHash() {
+    show(location.hash.slice(1), false);
+  }
+  window.addEventListener("popstate", fromHash);
+  window.addEventListener("hashchange", fromHash);
+  fromHash();
   $$("[data-count]").forEach(function (el) {
     var t = +el.dataset.count,
       s = el.dataset.suffix;
