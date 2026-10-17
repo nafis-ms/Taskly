@@ -106,7 +106,7 @@ $("login").onsubmit=function(e){e.preventDefault();var p=$("lpw").value;if(!p)re
  $("lerr").textContent="";$("lgo").disabled=true;$("lgo").textContent="Checking…";
  S.adminLogin(p,function(c){$("lgo").disabled=false;$("lgo").textContent="Log in";
   if(c===401)return $("lerr").textContent="Wrong password.";
-  if(c!==200)return $("lerr").textContent="Can't reach the server. Check ADMIN_PASSWORD and the Supabase settings on Vercel.";
+  if(c!==200)return $("lerr").textContent="Server problem - "+(S.lastError()||c)+". Check the Supabase project (paused?) and the Vercel environment variables.";
   ok=true;sessionStorage.setItem("taskly:adm","1");sessionStorage.setItem("taskly:key",p);S.pullFeedback(draw);gate()})};
 $("out").onclick=function(){sessionStorage.removeItem("taskly:adm");location.reload()};
 document.querySelectorAll("nav [data-v]").forEach(function(b){b.onclick=function(){v=b.dataset.v;draw()}});
