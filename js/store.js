@@ -67,9 +67,19 @@ var TasklyStore = (function () {
         .then(function (d) { s("taskly:feedback", d.items || []); cb && cb(true); })
         .catch(function () { cb && cb(false); });
     },
-    feedbackAct: function (id, method, cb) {
-      fetch("/api?id=" + encodeURIComponent(id), { method: method, headers: { "x-admin-key": S.adminKey() } })
-        .then(function () { S.pullFeedback(cb); }).catch(function () { cb && cb(false); });
+    feedbackAct: function (id, method, cb, status) {
+      fetch("/api?id=" + encodeURIComponent(id) + (status ? "&status=" + status : ""), { method: method, headers: { "x-admin-key": S.adminKey() } })
+        .then(function (r) { if (!r.ok) throw 0; S.pullFeedback(cb); }).catch(function () { cb && cb(false); });
+    },
+    /* admin login = ask the server (ADMIN_PASSWORD on Vercel); cb gets the HTTP status, 0 if unreachable */
+    adminLogin: function (pw, cb) {
+      fetch("/api", { headers: { "x-admin-key": pw }, cache: "no-store" })
+        .then(function (r) { cb(r.status); }).catch(function () { cb(0); });
+    },
+    adminAddFeedback: function (name, rating, text, cb) {
+      fetch("/api", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": S.adminKey() },
+        body: JSON.stringify({ email: "", name: name, rating: rating, text: text, status: "kept" }) })
+        .then(function (r) { if (!r.ok) throw 0; S.pullFeedback(cb); }).catch(function () { cb && cb(false); });
     }
   };
   return S;
