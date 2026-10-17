@@ -827,7 +827,7 @@
     track = $("fbtrack"),
     dots = $("fbdots"),
     nav = $("fbnav");
-  var items = [], mine = [], timer = null, hold = false, visible = false, holdT = 0, raf = 0;
+  var items = [], timer = null, hold = false, visible = false, holdT = 0, raf = 0;
 
   /* ---------- slider (all user text goes in with textContent, never innerHTML) ---------- */
   function stars(n) {
@@ -867,12 +867,6 @@
     var who = document.createElement("span");
     who.textContent = it.name || "Anonymous";
     c.appendChild(who);
-    if (it.pending) {
-      var tag = document.createElement("span");
-      tag.className = "fb-tag";
-      tag.textContent = "Awaiting review";
-      c.appendChild(tag);
-    }
     f.appendChild(c);
     return f;
   }
@@ -897,7 +891,7 @@
     track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? "auto" : "smooth" });
   }
   function render(emptyMsg) {
-    var list = mine.concat(items);
+    var list = items;
     track.textContent = "";
     dots.textContent = "";
     if (!list.length) {
@@ -1020,9 +1014,6 @@
         return;
       }
       status.textContent = "";
-      mine.unshift({ rating: rating, name: name || "Anonymous", text: text, pending: true });
-      mine = mine.slice(0, 3);
-      render();
       form.reset();
       who();
       counter.textContent = "0";
