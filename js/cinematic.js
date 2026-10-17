@@ -30,11 +30,9 @@
     }
   });
 
-  /* 2. hero: anamorphic light streaks */
   var hero = d.querySelector(".hero");
-  if (hero) { var fl = mk("div", "cx-flare"); fl.setAttribute("aria-hidden", "true"); mk("i", "", fl); mk("i", "", fl); hero.insertBefore(fl, hero.firstChild); }
 
-  /* 3. scroll: progress bar (if premium.js is not providing one) + parallax depth variable */
+  /* 2. scroll: progress bar (if premium.js is not providing one) + parallax depth variable */
   var bar = d.querySelector(".pp-bar") ? null : mk("div", "cx-bar", d.body), tick = false;
   if (bar) bar.setAttribute("aria-hidden", "true");
   function frame() {
