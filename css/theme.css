@@ -174,3 +174,17 @@ html:root[data-theme="dark"] body::after{content:"";position:fixed;inset:0;z-ind
 /* Rotating word: no glow in either theme; slightly bolder in light */
 html:root body .hero h1 .rot{text-shadow:none!important}
 html:root:not([data-theme="dark"]) body .hero h1 .rot{font-weight:800}
+
+/* Fixed navbar + tighter spacing between navbar and hero */
+html:root body .nav{
+  position:fixed;
+  top:calc(env(safe-area-inset-top,0px) + 30px);
+  left:0;
+  right:0;
+  margin:0 auto;
+}
+html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 140px)}
+html:root body .hero{min-height:0;padding-top:0;padding-bottom:30px}
+@media (max-width:767px){
+  html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+}
