@@ -15,37 +15,33 @@
   burger.onclick = function () {
     menu(mm.hidden);
   };
-  /* single-view navigation: only the chosen section is shown (Home = hero only) */
-  var VIEWS = ["home", "features", "about", "contact"];
-  document.documentElement.classList.add("views");
-  function show(id, push) {
-    if (VIEWS.indexOf(id) < 0) id = "home";
-    VIEWS.forEach(function (v) {
-      document.getElementById(v).classList.toggle("on", v === id);
-    });
-    $$(".links a").forEach(function (a) {
-      a.setAttribute("aria-current", a.getAttribute("href") === "#" + id);
-    });
-    menu(false);
-    if (push !== false && location.hash !== "#" + id) {
-      history.pushState(null, "", "#" + id);
-    }
-    window.scrollTo(0, 0);
-  }
   $$('a[href^="#"]:not([data-open])').forEach(function (a) {
     a.addEventListener("click", function (e) {
-      var id = (a.getAttribute("href") || "").slice(1) || "home";
-      if (VIEWS.indexOf(id) < 0) return;
+      var t = $(a.getAttribute("href"));
+      if (!t) return;
       e.preventDefault();
-      show(id);
+      menu(false);
+      t.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
     });
   });
-  function fromHash() {
-    show(location.hash.slice(1), false);
-  }
-  window.addEventListener("popstate", fromHash);
-  window.addEventListener("hashchange", fromHash);
-  fromHash();
+  var spy = new IntersectionObserver(
+    function (es) {
+      es.forEach(function (en) {
+        if (en.isIntersecting) {
+          $$(".links a").forEach(function (a) {
+            a.setAttribute(
+              "aria-current",
+              a.getAttribute("href") === "#" + en.target.id,
+            );
+          });
+        }
+      });
+    },
+    { rootMargin: "-40% 0px -55% 0px" },
+  );
+  ["home", "features", "about", "contact"].forEach(function (id) {
+    spy.observe(document.getElementById(id));
+  });
   $$("[data-count]").forEach(function (el) {
     var t = +el.dataset.count,
       s = el.dataset.suffix;
@@ -763,4 +759,42 @@
   });
   addEventListener("resize", function () { W = innerWidth; H = innerHeight; });
   requestAnimationFrame(draw);
+})();
+/* desktop: one scroll gesture = one section (phones keep normal smooth scrolling) */
+(function () {
+  var secs = ["home", "features", "about", "contact"].map(function (id) {
+    return document.getElementById(id);
+  });
+  if (secs.some(function (s) { return !s; })) return;
+  var desktop = matchMedia("(min-width:768px)");
+  var reduce = matchMedia("(prefers-reduced-motion:reduce)");
+  var busyUntil = 0, last = 0;
+  function current() {
+    var mid = innerHeight / 2, i;
+    for (i = 0; i < secs.length; i++) {
+      var r = secs[i].getBoundingClientRect();
+      if (r.top <= mid && r.bottom > mid) return i;
+    }
+    return 0;
+  }
+  addEventListener(
+    "wheel",
+    function (e) {
+      if (!desktop.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      if (document.querySelector(".modal:not([hidden])")) return;
+      var i = current(), dir = e.deltaY > 0 ? 1 : -1, r = secs[i].getBoundingClientRect();
+      /* a section taller than the screen scrolls normally until its edge */
+      if (dir > 0 && r.bottom > innerHeight + 2) return;
+      if (dir < 0 && r.top < -2) return;
+      e.preventDefault();
+      var now = Date.now(), gap = now - last;
+      last = now;
+      if (now < busyUntil || gap < 80) return;
+      var next = secs[i + dir];
+      if (!next) return;
+      busyUntil = now + 900;
+      next.scrollIntoView({ behavior: reduce.matches ? "auto" : "smooth" });
+    },
+    { passive: false },
+  );
 })();
