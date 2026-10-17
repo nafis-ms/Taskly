@@ -210,4 +210,4 @@ function lcPoll(){return A("GET","?admin=1").then(function(d){L.err="";L.chats=d
  if(tot>L.lastTot)lcChime();L.lastTot=tot;if(v==="lc"&&$("lcl"))lcList()}).catch(function(e){if(e.status!==401){L.err=e.message;if(v==="lc"&&$("lcl")&&!L.chats.length)lcList()}})}
 setInterval(function(){if(ok)lcPoll()},3000);setInterval(function(){if(ok&&v==="lc"&&L.sel)lcMsgs()},2000);
 addEventListener("storage",function(){if(ok)draw()});setInterval(function(){if(ok)S.pullFeedback()},15000);setInterval(function(){if(ok)draw()},5000);if(ok)S.pullFeedback(draw);gate();
-</script></body></html>
+</script><script src="js/cinematic.js?v=1" defer></script></body></html>
