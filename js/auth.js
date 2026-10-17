@@ -47,8 +47,11 @@ var TasklyAuth = (function () {
   /* a session only counts when the email is verified (Google accounts always are) */
   function verified(u) { return !!(u && (u.email_confirmed_at || u.confirmed_at)); }
 
+  function clearData() { try { localStorage.removeItem("taskly:data:v1"); localStorage.removeItem("taskly:ts"); } catch (e) {} }
   function publish(u) {
     try {
+      var prev = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+      if (prev && prev.email && prev.email.toLowerCase() !== u.email.toLowerCase()) clearData(); /* never show another user's tasks */
       localStorage.setItem(USER_KEY, JSON.stringify({ email: u.email, name: nameOf(u) }));
       var m = JSON.parse(localStorage.getItem("taskly:names") || "{}") || {};
       m[u.email.toLowerCase()] = nameOf(u);
@@ -57,7 +60,7 @@ var TasklyAuth = (function () {
     if (window.TasklyStore) { TasklyStore.signup(u.email, nameOf(u)); }
     window.dispatchEvent(new CustomEvent("taskly-auth", { detail: { email: u.email, name: nameOf(u) } }));
   }
-  function clearLocal() { try { localStorage.removeItem(USER_KEY); } catch (e) {} }
+  function clearLocal() { try { localStorage.removeItem(USER_KEY); } catch (e) {} clearData(); }
 
   function friendly(err) {
     var m = String((err && err.message) || err || "");
@@ -76,6 +79,11 @@ var TasklyAuth = (function () {
     return { level: level, label: ["", "Easy", "Medium", "Hard"][level] };
   }
   var API = {
+    token: function () {
+      return boot().then(function (c) { return c.auth.getSession(); })
+        .then(function (r) { return r.data && r.data.session ? r.data.session.access_token : null; })
+        .catch(function () { return null; });
+    },
     strength: strength,
     isDisposable: isDisposable,
     friendly: friendly,
