@@ -121,7 +121,11 @@
     try {
       localStorage.removeItem("taskly:user");
     } catch (e) {}
-    location.href = "index.html";
+    var go = function () {
+      location.href = "index.html";
+    };
+    if (window.TasklyAuth) TasklyAuth.signOut().then(go, go);
+    else go();
   });
 
   /* ---------- toasts ---------- */
