@@ -7,19 +7,6 @@ p{text-wrap:pretty}
 :focus-visible{outline:2px solid var(--blue,#6d5ae6);outline-offset:3px;border-radius:6px}
 @media (pointer:fine){html{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--blue,#6d5ae6) 45%,transparent) transparent}}
 
-/* opening: dark letterbox curtains part over the logo, then the hero plays */
-.pp-intro{position:fixed;inset:0;z-index:2000;pointer-events:none;display:grid;place-items:center;animation:pp-failsafe 0s 4s forwards}
-.pp-intro i{position:absolute;left:0;right:0;height:50.5%;background:#07051a;transition:transform 1s var(--pp-ease) .3s}
-.pp-intro i:first-child{top:0}
-.pp-intro i:last-child{bottom:0}
-.pp-intro b{position:relative;font:700 clamp(30px,5vw,54px)/1 var(--font-head,sans-serif);letter-spacing:-.02em;color:#fff;opacity:0;animation:pp-logo 1s var(--pp-ease) .1s forwards}
-.pp-intro.go i:first-child{transform:translateY(-101%)}
-.pp-intro.go i:last-child{transform:translateY(101%)}
-.pp-intro.go b{animation:pp-logo-out .45s ease forwards}
-@keyframes pp-logo{from{opacity:0;transform:translateY(14px) scale(.96);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
-@keyframes pp-logo-out{to{opacity:0;transform:scale(1.07);filter:blur(6px)}}
-@keyframes pp-failsafe{to{visibility:hidden}}
-html.pp-hold .hero .copy>*,html.pp-hold .orb-wrap{animation-play-state:paused!important}
 
 /* scroll progress */
 .pp-bar{position:fixed;inset:0 0 auto 0;height:3px;z-index:1200;transform-origin:0 50%;transform:scaleX(var(--p,0));background:var(--grad,linear-gradient(90deg,#7c6cf0,#e79bc2));box-shadow:0 0 14px color-mix(in srgb,var(--blue,#6d5ae6) 60%,transparent);pointer-events:none}
@@ -52,7 +39,7 @@ html.pp-scrolled body .nav{box-shadow:0 18px 50px -18px rgba(40,25,110,.35)}
 
 @media (prefers-reduced-motion:reduce){
   .pp-grain{animation:none}
-  .pp-halo,.pp-intro{display:none}
+  .pp-halo{display:none}
   .pp-bar{transition:none}
   html:root body .main>section{opacity:1}
 }
