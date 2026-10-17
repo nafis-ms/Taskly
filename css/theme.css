@@ -183,8 +183,8 @@ html:root body .nav{
   right:0;
   margin:0 auto;
 }
-html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 140px)}
+html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 190px)}
 html:root body .hero{min-height:0;padding-top:0;padding-bottom:30px}
 @media (max-width:767px){
-  html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+  html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
 }
