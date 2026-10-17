@@ -43,11 +43,42 @@
       if (t.done == null) t.done = false;
     });
   }
+  var pushT = 0;
+  function push() {
+    clearTimeout(pushT);
+    pushT = setTimeout(function () {
+      TasklyAuth.token().then(function (t) {
+        if (!t) return;
+        fetch("/api/data", { method: "PUT", headers: { Authorization: "Bearer " + t, "Content-Type": "application/json" },
+          body: JSON.stringify({ data: S, ts: +localStorage.getItem("taskly:ts") || Date.now() }) }).catch(function () {});
+      });
+    }, 1200);
+  }
   function save() {
     try {
       localStorage.setItem(KEY, JSON.stringify(S));
+      localStorage.setItem("taskly:ts", String(Date.now()));
     } catch (e) {}
+    push();
   }
+  /* the account on the server is the source of truth; localStorage is just a cache */
+  function sync() {
+    TasklyAuth.token().then(function (t) {
+      if (!t) return;
+      fetch("/api/data", { headers: { Authorization: "Bearer " + t }, cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return;
+          var local = +localStorage.getItem("taskly:ts") || 0;
+          if (d.data && d.ts > local) {
+            localStorage.setItem(KEY, JSON.stringify(d.data));
+            localStorage.setItem("taskly:ts", String(d.ts));
+            location.reload();
+          } else if (local > d.ts) push();
+        }).catch(function () {});
+    });
+  }
+  setTimeout(sync, 300);
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
