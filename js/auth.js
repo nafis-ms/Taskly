@@ -67,7 +67,16 @@ var TasklyAuth = (function () {
     if (/password/i.test(m) && /(least|short|weak)/i.test(m)) return "Choose a stronger password (8+ characters).";
     return m || "Something went wrong. Please try again.";
   }
+  /* password strength: 1 type of character = easy, 2 = medium (e.g. letters + numbers), 3 (letters + numbers + symbols) = hard */
+  function strength(pw) {
+    pw = String(pw || "");
+    if (!pw) return { level: 0, label: "" };
+    var types = (/[A-Za-z]/.test(pw) ? 1 : 0) + (/[0-9]/.test(pw) ? 1 : 0) + (/[^A-Za-z0-9\s]/.test(pw) ? 1 : 0);
+    var level = pw.length < 8 ? 1 : Math.max(1, types);
+    return { level: level, label: ["", "Easy", "Medium", "Hard"][level] };
+  }
   var API = {
+    strength: strength,
     isDisposable: isDisposable,
     friendly: friendly,
     signUp: function (email, pw, name) {
@@ -121,6 +130,11 @@ var TasklyAuth = (function () {
     ".g-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:6px 0 2px;padding:11px 14px;border:1px solid rgba(128,128,128,.35);border-radius:12px;background:#fff;color:#1f1f1f;font:600 15px/1 inherit;font-family:inherit;cursor:pointer}" +
     ".g-btn:hover{background:#f5f5f5}.g-btn:disabled{opacity:.6;cursor:wait}" +
     "[data-theme=dark] .g-btn{background:#fff;color:#1f1f1f}" +
+    ".pwbar{display:none;margin-top:6px;font-size:12px}.pwbar.on{display:flex;align-items:center;gap:10px}" +
+    ".pwbar-track{display:flex;gap:4px;flex:1}.pwbar-track i{flex:1;height:6px;border-radius:4px;background:rgba(128,128,128,.28);transition:background .2s}" +
+    ".pwbar[data-l=\"1\"] i:nth-child(1){background:#e5484d}.pwbar[data-l=\"2\"] i:nth-child(-n+2){background:#f5a524}.pwbar[data-l=\"3\"] i{background:#30a46c}" +
+    ".pwbar-label{min-width:56px;text-align:right;font-weight:700}" +
+    ".pwbar[data-l=\"1\"] .pwbar-label{color:#e5484d}.pwbar[data-l=\"2\"] .pwbar-label{color:#f5a524}.pwbar[data-l=\"3\"] .pwbar-label{color:#30a46c}" +
     ".g-or{display:flex;align-items:center;gap:10px;margin:10px 0 4px;font-size:12px;opacity:.65}" +
     ".g-or:before,.g-or:after{content:\"\";flex:1;height:1px;background:currentColor;opacity:.25}";
   document.head.appendChild(st);
