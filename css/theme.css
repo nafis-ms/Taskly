@@ -20,8 +20,6 @@ html:root[data-theme="dark"]{
 }
 html:root body{background:radial-gradient(120% 90% at 78% 12%,color-mix(in srgb,var(--glow-1) 38%,transparent),transparent 60%),radial-gradient(90% 80% at 8% 90%,color-mix(in srgb,var(--glow-2) 30%,transparent),transparent 60%),var(--bg);background-attachment:fixed;font-family:var(--font-body);transition:background .5s,color .4s}
 html:root[data-theme="dark"] body{background:radial-gradient(120% 90% at 78% 12%,color-mix(in srgb,var(--glow-1) 34%,transparent),transparent 60%),linear-gradient(165deg,#080621 0%,#050416 45%,#020208 100%);background-attachment:fixed}
-html:root body::before{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;background:var(--bg);animation:curtain 1.3s .1s cubic-bezier(.7,0,.2,1) forwards}
-@keyframes curtain{0%{clip-path:inset(0)}100%{clip-path:inset(0 0 100% 0);visibility:hidden}}
 html:root body .glow{opacity:.9}
 html:root body .glow i{animation:drift 14s ease-in-out infinite alternate}
 html:root body .glow .g2{animation-duration:19s}html:root body .glow .g3{animation-duration:23s}
@@ -47,7 +45,7 @@ html:root body{
 html:root body{
  .hero{display:grid;grid-template-columns:1.05fr 1fr;align-items:center;gap:20px;min-height:min(780px,92vh);padding:70px 6vw 30px}
  .hero .copy>*{animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
- .hero .copy>:nth-child(1){animation-delay:1s}.hero .copy>:nth-child(2){animation-delay:1.12s}.hero .copy>:nth-child(3){animation-delay:1.26s}.hero .copy>:nth-child(4){animation-delay:1.4s}
+ .hero .copy>:nth-child(1){animation-delay:.1s}.hero .copy>:nth-child(2){animation-delay:.24s}.hero .copy>:nth-child(3){animation-delay:.38s}.hero .copy>:nth-child(4){animation-delay:.52s}
  .hero h1{font:700 clamp(40px,6vw,78px)/1.04 var(--font-head);letter-spacing:-2px;color:var(--ink)}
  .hero h1 .rot{display:inline-block;text-shadow:none}
  .sub{color:var(--muted);line-height:1.8;max-width:30em}
@@ -110,7 +108,7 @@ html:root body{
 @media (min-width:769px){html:root body{.tabs{border-radius:28px}.tabs .ic{background:var(--surf2);border-color:var(--line);color:var(--ink)}.tabs .dk[aria-selected="true"] .ic{background:var(--grad);color:#fff;box-shadow:0 8px 24px color-mix(in srgb,var(--blue) 55%,transparent)}.tabs .dk[aria-selected="true"]::before{background:var(--blue)}}}
 @media (max-width:768px){html:root body .tabs{background:var(--surf2)}}
 @media (max-width:860px){html:root body .hero{grid-template-columns:1fr;padding-top:40px;text-align:left}.orb-wrap{width:min(440px,88vw)!important}}
-@media (prefers-reduced-motion:reduce){html:root body::before{display:none}.sh,.glow i,.page::before,.hero .copy>*,.orb-wrap{animation:none!important}.rv{opacity:1;transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){.sh,.glow i,.page::before,.hero .copy>*,.orb-wrap{animation:none!important}.rv{opacity:1;transform:none;filter:none}}
 
 /* ===== Bokeh bubbles + landing re-layout ===== */
 .bokeh{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
@@ -129,7 +127,7 @@ html:root body{
  .sub{font-size:15px;max-width:28em}
  .cta2{display:inline-flex;align-items:center;margin:14px 0 0 14px;padding:15px 28px;border:2px solid var(--ink);border-radius:999px;color:var(--ink);font:700 12px var(--font-body);letter-spacing:.18em;text-transform:uppercase;transition:background .25s,color .25s,transform .25s}
  .cta2:hover{background:var(--ink);color:var(--bg);transform:translateY(-3px)}
- .hero .copy>.cta2{animation:rise .9s 1.5s cubic-bezier(.2,.8,.2,1) both}
+ .hero .copy>.cta2{animation:rise .9s .66s cubic-bezier(.2,.8,.2,1) both}
 }
 @media (max-width:860px){
  html:root body{.hero{padding-inline:6vw}.hero .copy{order:1;justify-self:start}.hero .orb-wrap{order:2}.cta2{margin-left:0}}
