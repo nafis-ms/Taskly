@@ -338,12 +338,20 @@
     );
     chk(v.cm, "Write at least 10 characters.", v.cm.value.trim().length < 10);
     if (!ok) return;
-    st.textContent =
-      "Thanks, " +
-      v.cn.value.trim().split(" ")[0] +
-      ". We got your message and will reply to " +
-      v.ce.value.trim() +
-      " within one business day.";
+    var who = v.cn.value.trim().split(" ")[0];
+    if (window.TasklyChat) {
+      /* live chat: the chat window pops up and the admin replies there */
+      window.TasklyChat.start({
+        name: v.cn.value.trim(),
+        email: v.ce.value.trim(),
+        text: v.cm.value.trim(),
+        website: v.website ? v.website.value : "",
+      });
+      st.textContent = "Thanks, " + who + ". Your chat is open, and we'll reply right there.";
+    } else {
+      st.textContent =
+        "Thanks, " + who + ". We got your message and will reply to " + v.ce.value.trim() + " within one business day.";
+    }
     cf.reset();
   });
   var words = [
