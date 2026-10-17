@@ -1,89 +1,226 @@
 /**
- * Admin: real accounts from Supabase Auth -> route: /api/users   (header x-admin-key: ADMIN_PASSWORD)
- *   GET                          list accounts
- *   POST ?id=ID&action=ban|unban|reset|delete
- * Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSWORD (already set)
+ * Taskly browser store -> window.TasklyStore
+ * Loaded by index.html, app.html and admin.html (js/store.js?v=2).
+ *
+ * NOTE: this file must run in the BROWSER. It used to contain a copy of api/users.js
+ * (server code), which left TasklyStore undefined and broke the admin login.
+ *
+ * Talks to the Vercel API:
+ *   /api         feedback (public submit, admin list / keep / reject / delete / add)
+ *   /api/users   real accounts from Supabase Auth (admin only)
+ * Admin requests send the header  x-admin-key: <ADMIN_PASSWORD>
+ * Chat between a signed-in user and the admin (support widget) is kept in localStorage ("taskly:chat").
  */
-const crypto = require("crypto");
-const BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
-const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const json = (res, code, body) => {
-  res.statusCode = code;
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "no-store");
-  res.end(JSON.stringify(body));
-};
-function isAdmin(req) {
-  const given = String(req.headers["x-admin-key"] || "");
-  const real = process.env.ADMIN_PASSWORD || "";
-  if (!real || !given) return false;
-  const a = crypto.createHash("sha256").update(given).digest();
-  const b = crypto.createHash("sha256").update(real).digest();
-  return crypto.timingSafeEqual(a, b);
-}
-const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+(function () {
+  "use strict";
 
-module.exports = async (req, res) => {
-  if (!BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
-  if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
-  try {
-    if (req.method === "GET") {
-      const [ur, dr] = await Promise.all([
-        fetch(`${BASE}/auth/v1/admin/users?per_page=1000`, { headers: H }),
-        fetch(`${BASE}/rest/v1/taskly_data?select=user_id,data`, { headers: H }),
-      ]);
-      if (!ur.ok) return json(res, 500, { error: "Could not list users" });
-      const users = (await ur.json()).users || [];
-      const rows = dr.ok ? await dr.json() : [];
-      const stats = {};
-      rows.forEach((r) => {
-        const t = (r.data && r.data.todos) || [];
-        stats[r.user_id] = { tasks: t.length, done: t.filter((x) => x && x.done).length };
-      });
-      const now = Date.now();
-      return json(res, 200, {
-        items: users.map((u) => ({
-          id: u.id,
-          email: u.email,
-          name: (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || "",
-          created: new Date(u.created_at).getTime(),
-          last: u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : 0,
-          suspended: !!(u.banned_until && new Date(u.banned_until).getTime() > now),
-          verified: !!(u.email_confirmed_at || u.confirmed_at),
-          provider: (u.app_metadata && u.app_metadata.provider) || "email",
-          tasks: (stats[u.id] || {}).tasks || 0,
-          done: (stats[u.id] || {}).done || 0,
-          days: [],
-        })),
-      });
+  var KEY_ADMIN = "taskly:key"; /* sessionStorage: admin password for this tab */
+  var KEY_FLAG = "taskly:adm";  /* sessionStorage: admin is logged in */
+  var KEY_CHAT = "taskly:chat";
+  var KEY_SEEN = "taskly:chatseen";
+  var KEY_ACC = "taskly:accounts";
+
+  var accountsCache = {}; /* lower-cased email -> account (from /api/users) */
+  var feedbackCache = []; /* all feedback (from /api, admin) */
+
+  /* ---------- tiny localStorage helpers ---------- */
+  function get(key, def) {
+    try {
+      var v = localStorage.getItem(key);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) {
+      return def;
     }
-    if (req.method === "POST") {
-      const id = String((req.query && req.query.id) || "").replace(/[^0-9a-f-]/gi, "");
-      const action = String((req.query && req.query.action) || "");
-      if (!id) return json(res, 400, { error: "Missing id" });
-      if (action === "ban" || action === "unban") {
-        const r = await fetch(`${BASE}/auth/v1/admin/users/${id}`, {
-          method: "PUT", headers: H, body: JSON.stringify({ ban_duration: action === "ban" ? "876000h" : "none" }),
-        });
-        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Update failed" });
-      }
-      if (action === "delete") {
-        await fetch(`${BASE}/rest/v1/taskly_data?user_id=eq.${id}`, { method: "DELETE", headers: H });
-        const r = await fetch(`${BASE}/auth/v1/admin/users/${id}`, { method: "DELETE", headers: H });
-        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Delete failed" });
-      }
-      if (action === "reset") {
-        const g = await fetch(`${BASE}/auth/v1/admin/users/${id}`, { headers: H });
-        const u = g.ok ? await g.json() : null;
-        if (!u || !u.email) return json(res, 404, { error: "User not found" });
-        const r = await fetch(`${BASE}/auth/v1/recover`, { method: "POST", headers: H, body: JSON.stringify({ email: u.email }) });
-        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Could not send reset email" });
-      }
-      return json(res, 400, { error: "Unknown action" });
-    }
-    res.setHeader("Allow", "GET, POST");
-    return json(res, 405, { error: "Method not allowed" });
-  } catch (e) {
-    return json(res, 500, { error: "Request failed" });
   }
-};
+  function set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch (e) { return false; }
+  }
+  function day(ts) {
+    var d = new Date(ts == null ? Date.now() : ts);
+    var m = d.getMonth() + 1, n = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (n < 10 ? "0" : "") + n;
+  }
+  function lc(s) { return String(s || "").trim().toLowerCase(); }
+
+  /* ---------- admin session ---------- */
+  function adminKey() {
+    try { return sessionStorage.getItem(KEY_ADMIN) || ""; } catch (e) { return ""; }
+  }
+  function adminLogoutLocal() {
+    try { sessionStorage.removeItem(KEY_FLAG); sessionStorage.removeItem(KEY_ADMIN); } catch (e) {}
+  }
+
+  /* fetch JSON; resolves {status, data}; status 0 = could not reach the server */
+  function api(method, url, body, key) {
+    var headers = {};
+    var k = key == null ? adminKey() : key;
+    try {
+      if (k) headers["x-admin-key"] = k;
+      if (body) headers["Content-Type"] = "application/json";
+      return fetch(url, {
+        method: method,
+        cache: "no-store",
+        headers: headers,
+        body: body ? JSON.stringify(body) : undefined
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          return { status: r.status, data: d || {} };
+        });
+      }, function () { return { status: 0, data: {} }; });
+    } catch (e) {
+      return Promise.resolve({ status: 0, data: {} });
+    }
+  }
+
+  function setAccounts(items) {
+    var map = {};
+    (items || []).forEach(function (u) {
+      if (!u || !u.email) return;
+      map[lc(u.email)] = {
+        id: u.id, email: u.email, name: u.name || "",
+        created: u.created || 0, last: u.last || 0,
+        suspended: !!u.suspended, verified: !!u.verified, provider: u.provider || "email",
+        tasks: u.tasks || 0, done: u.done || 0,
+        days: Array.isArray(u.days) ? u.days : []
+      };
+    });
+    accountsCache = map;
+  }
+
+  /* admin login: cb(httpStatus)  200 = ok, 401 = wrong password, anything else = server problem */
+  function adminLogin(password, cb) {
+    api("GET", "/api/users", null, String(password)).then(function (r) {
+      if (r.status === 200) setAccounts(r.data.items);
+      cb(r.status);
+    });
+  }
+
+  /* refresh feedback + accounts for the admin panel */
+  function pullFeedback(cb) {
+    if (!adminKey()) { if (cb) cb(); return; }
+    Promise.all([api("GET", "/api"), api("GET", "/api/users")]).then(function (res) {
+      if (res[0].status === 401 || res[1].status === 401) { /* password changed or session stale */
+        adminLogoutLocal();
+        location.reload();
+        return;
+      }
+      if (res[0].status === 200) feedbackCache = res[0].data.items || [];
+      if (res[1].status === 200) setAccounts(res[1].data.items);
+      if (cb) cb();
+    });
+  }
+
+  /* admin: keep / reject (PATCH + status) or delete (DELETE). cb(ok, message) */
+  function feedbackAct(id, method, cb, status) {
+    var url = "/api?id=" + encodeURIComponent(id) + (status ? "&status=" + encodeURIComponent(status) : "");
+    api(method, url).then(function (r) {
+      if (r.status === 200) {
+        if (method === "DELETE") feedbackCache = feedbackCache.filter(function (x) { return x.id !== String(id); });
+        else feedbackCache.forEach(function (x) { if (x.id === String(id) && status) x.status = status; });
+        if (cb) cb(true);
+      } else if (cb) {
+        cb(false, r.data.detail || r.data.error || (r.status ? "Server error " + r.status : "Can't reach the server"));
+      }
+    });
+  }
+
+  /* admin: post straight to the slideshow. cb(ok) */
+  function adminAddFeedback(name, rating, text, cb) {
+    api("POST", "/api", { name: name || "Anonymous", rating: rating, text: text, status: "kept" }).then(function (r) {
+      if (r.status === 201 || r.status === 200) {
+        if (r.data && r.data.item) feedbackCache.push(r.data.item);
+        if (cb) cb(true);
+      } else if (cb) cb(false);
+    });
+  }
+
+  /* anyone: submit feedback (goes to "pending" until the admin keeps it). cb(sent) */
+  function addFeedback(email, name, rating, text, cb) {
+    api("POST", "/api", { email: email || "", name: name || "", rating: rating, text: text }, "").then(function (r) {
+      if (cb) cb(r.status === 201 || r.status === 200);
+    });
+  }
+
+  /* ---------- local account bookkeeping (browser side) ---------- */
+  function localAccounts() { return get(KEY_ACC, {}) || {}; }
+  function signup(email, name) {
+    var k = lc(email); if (!k) return false;
+    var a = localAccounts();
+    if (!a[k]) a[k] = { email: email, name: name || "", created: Date.now(), last: Date.now() };
+    else if (name) a[k].name = name;
+    set(KEY_ACC, a);
+    return true;
+  }
+  function login(email) {
+    var k = lc(email); if (!k) return false;
+    var a = localAccounts();
+    if (a[k] && a[k].suspended) return false;
+    if (!a[k]) a[k] = { email: email, name: "", created: Date.now() };
+    a[k].last = Date.now();
+    set(KEY_ACC, a);
+    return true;
+  }
+  /* in-app heartbeat; false = this account was suspended -> app signs the user out */
+  function touch(email, stats) {
+    var k = lc(email); if (!k) return false;
+    var a = localAccounts();
+    if (a[k] && a[k].suspended) return false;
+    if (!a[k]) a[k] = { email: email, name: "", created: Date.now() };
+    a[k].last = Date.now();
+    if (stats) { a[k].tasks = stats.tasks || 0; a[k].done = stats.done || 0; a[k].rem = stats.rem || 0; }
+    set(KEY_ACC, a);
+    return true;
+  }
+  function accountAct(id, action, cb) {
+    api("POST", "/api/users?id=" + encodeURIComponent(id) + "&action=" + encodeURIComponent(action)).then(function (r) {
+      if (r.status === 200) {
+        Object.keys(accountsCache).forEach(function (k) {
+          var u = accountsCache[k];
+          if (u.id !== id) return;
+          if (action === "ban") u.suspended = true;
+          if (action === "unban") u.suspended = false;
+          if (action === "delete") delete accountsCache[k];
+        });
+        if (cb) cb(true);
+      } else if (cb) {
+        cb(false, r.data.error || (r.status ? "Server error " + r.status : "Can't reach the server"));
+      }
+    });
+  }
+
+  /* ---------- support chat (user <-> admin), kept in localStorage ---------- */
+  function chat() { return get(KEY_CHAT, {}) || {}; }
+  function send(email, from, text) {
+    var k = lc(email), t = String(text || "").trim().slice(0, 500);
+    if (!k || !t) return false;
+    var c = chat();
+    var list = c[k] || [];
+    var ts = Date.now();
+    if (list.length && list[list.length - 1].ts >= ts) ts = list[list.length - 1].ts + 1;
+    list.push({ from: from === "admin" ? "admin" : "user", text: t, ts: ts });
+    c[k] = list.slice(-200);
+    set(KEY_CHAT, c);
+    return true;
+  }
+  function markRead(email, role) {
+    var k = lc(email), list = chat()[k] || [];
+    var seen = get(KEY_SEEN, {}) || {};
+    seen[k + "|" + role] = list.length ? list[list.length - 1].ts : 0;
+    set(KEY_SEEN, seen);
+  }
+  function unread(email, role) {
+    var k = lc(email), other = role === "admin" ? "user" : "admin";
+    var seen = (get(KEY_SEEN, {}) || {})[k + "|" + role] || 0;
+    return (chat()[k] || []).filter(function (m) { return m.from === other && m.ts > seen; }).length;
+  }
+
+  window.TasklyStore = {
+    get: get, set: set, day: day,
+    adminLogin: adminLogin, adminKey: adminKey,
+    pullFeedback: pullFeedback, feedback: function () { return feedbackCache; },
+    feedbackAct: feedbackAct, adminAddFeedback: adminAddFeedback, addFeedback: addFeedback,
+    accounts: function () { return accountsCache; }, accountAct: accountAct,
+    signup: signup, login: login, touch: touch,
+    chat: chat, send: send, unread: unread, markRead: markRead
+  };
+})();
