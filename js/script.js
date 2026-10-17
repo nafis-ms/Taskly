@@ -167,18 +167,28 @@
     );
     chk(v.pw, "Use at least 8 characters.", v.pw.value.length < 8);
     if (!ok) return;
-    $("#dm").textContent =
-      "Welcome, " +
-      v.name.value.trim().split(" ")[0] +
-      ". We sent a confirmation link to " +
-      v.email.value.trim() +
-      ".";
-    savePw(v.email.value.trim(), v.pw.value);
-    TasklyStore.signup(v.email.value.trim(), v.name.value.trim());
-    setUser(v.email.value.trim(), v.name.value.trim());
-    form.hidden = true;
-    done.hidden = false;
-    $("#dc").focus();
+    var sb = form.querySelector(".submit"),
+      ss = $("#sstatus"),
+      em = v.email.value.trim(),
+      nm = v.name.value.trim();
+    ss.textContent = "";
+    sb.disabled = true;
+    TasklyAuth.signUp(em, v.pw.value, nm).then(function (r) {
+      sb.disabled = false;
+      if (r.error) {
+        var msg = TasklyAuth.friendly(r.error);
+        chk(v.email, msg, true);
+        return;
+      }
+      TasklyStore.signup(em, nm);
+      $("#dt").textContent = r.needsConfirm ? "Check your email" : "You're in!";
+      $("#dm").textContent = r.needsConfirm
+        ? "We sent a confirmation link to " + em + ". Click it to verify your email, then log in. (Check spam if you don't see it.)"
+        : "Welcome, " + nm.split(" ")[0] + ".";
+      form.hidden = true;
+      done.hidden = false;
+      $("#dc").focus();
+    });
   });
   var orb = $("#orb"),
     grab = $("#orbGrab"),
@@ -469,6 +479,7 @@
       i.focus();
       return;
     }
+    TasklyAuth.resetPassword(i.value.trim());
     st.textContent =
       "If an account exists for " +
       i.value.trim() +
@@ -492,23 +503,39 @@
       v.lp.focus();
       return;
     }
-    var saved = pwMap()[v.le.value.trim().toLowerCase()];
-    if (saved && saved !== pwHash(v.lp.value)) {
-      lerr(v.lp, "Incorrect password.");
-      v.lp.focus();
-      return;
-    }
-    if (!TasklyStore.login(v.le.value.trim())) {
-      lerr(v.le, "This account is suspended. Contact support.");
-      v.le.focus();
-      return;
-    }
-    $("#ldm").textContent =
-      "Welcome back! You are logged in as " + v.le.value.trim() + ".";
-    setUser(v.le.value.trim());
-    lf.hidden = true;
-    ld.hidden = false;
-    $("#lc").focus();
+    var lb = lf.querySelector(".submit"),
+      lem = v.le.value.trim();
+    lb.disabled = true;
+    TasklyAuth.signIn(lem, v.lp.value).then(function (r) {
+      lb.disabled = false;
+      if (r.error) {
+        var msg = TasklyAuth.friendly(r.error);
+        if (/confirm your email/i.test(msg)) {
+          lerr(v.le, msg);
+          $("#lstatus").innerHTML = "";
+          var rb = document.createElement("button");
+          rb.type = "button";
+          rb.className = "link";
+          rb.textContent = "Resend confirmation email";
+          rb.onclick = function () {
+            TasklyAuth.resend(lem);
+            $("#lstatus").textContent = "Confirmation email sent to " + lem + ".";
+          };
+          $("#lstatus").appendChild(rb);
+        } else lerr(/password|credentials/i.test(msg) ? v.lp : v.le, msg);
+        return;
+      }
+      if (!TasklyStore.login(lem)) {
+        TasklyAuth.signOut();
+        lerr(v.le, "This account is suspended. Contact support.");
+        v.le.focus();
+        return;
+      }
+      $("#ldm").textContent = "Welcome back! You are logged in as " + lem + ".";
+      lf.hidden = true;
+      ld.hidden = false;
+      $("#lc").focus();
+    });
   });
   document.addEventListener("keydown", function (e) {
     if (lm.hidden) return;
@@ -608,32 +635,6 @@
       return {};
     }
   }
-  /* passwords live only in this browser (no server): a salted hash per email, shared with Settings in the app */
-  function pwHash(pw) {
-    var s = "taskly|" + pw, h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (var i = 0; i < s.length; i++) {
-      var c = s.charCodeAt(i);
-      h1 = Math.imul(h1 ^ c, 2654435761);
-      h2 = Math.imul(h2 ^ c, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
-  }
-  function pwMap() {
-    try {
-      return JSON.parse(localStorage.getItem("taskly:pw") || "{}") || {};
-    } catch (e) {
-      return {};
-    }
-  }
-  function savePw(email, pw) {
-    try {
-      var m = pwMap();
-      m[email.toLowerCase()] = pwHash(pw);
-      localStorage.setItem("taskly:pw", JSON.stringify(m));
-    } catch (e) {}
-  }
   function setUser(email, name) {
     var key = email.toLowerCase();
     try {
@@ -658,8 +659,29 @@
       try {
         localStorage.removeItem(USER_KEY);
       } catch (err) {}
+      TasklyAuth.signOut();
       applyAuth();
     });
+  });
+  $$("[data-google]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      b.disabled = true;
+      TasklyAuth.google().then(function (r) {
+        if (r && r.error) {
+          b.disabled = false;
+          var t = b.closest("form").querySelector(".ok");
+          if (t) t.textContent = TasklyAuth.friendly(r.error);
+        }
+      });
+    });
+  });
+  /* fired by auth.js when a verified session exists (Google return, email-link return, password login) */
+  window.addEventListener("taskly-auth", function (e) {
+    if (!TasklyStore.login(e.detail.email)) {
+      TasklyAuth.signOut();
+      return;
+    }
+    setUser(e.detail.email, e.detail.name);
   });
   $("#cta").addEventListener("click", function (e) {
     if (getUser()) return;
