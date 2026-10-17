@@ -143,6 +143,18 @@
       }
     }
   });
+  var pwbar = $("#pwbar"),
+    pwlabel = $("#pwlabel");
+  function pwShow() {
+    var r = TasklyAuth.strength(form.elements.pw.value);
+    pwbar.dataset.l = r.level;
+    pwbar.classList.toggle("on", r.level > 0);
+    pwlabel.textContent = r.label;
+  }
+  form.elements.pw.addEventListener("input", pwShow);
+  form.addEventListener("reset", function () {
+    setTimeout(pwShow, 0);
+  });
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var v = form.elements,
@@ -165,7 +177,14 @@
       "Enter a valid email address.",
       !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.value.trim()),
     );
-    chk(v.pw, "Use at least 8 characters.", v.pw.value.length < 8);
+    var pwv = v.pw.value;
+    chk(
+      v.pw,
+      pwv.length < 8
+        ? "Use at least 8 characters."
+        : "Password is too easy. Mix letters and numbers (add a symbol for a hard password).",
+      pwv.length < 8 || TasklyAuth.strength(pwv).level < 2,
+    );
     if (!ok) return;
     var sb = form.querySelector(".submit"),
       ss = $("#sstatus"),
