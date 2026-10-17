@@ -188,3 +188,6 @@ html:root body .hero{min-height:0;padding-top:0;padding-bottom:30px}
 @media (max-width:767px){
   html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
 }
+
+/* One section at a time: Home shows only the hero */
+html.views .main > section:not(.on){display:none}
