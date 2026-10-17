@@ -14,7 +14,6 @@
 @keyframes cx-dlg{from{opacity:0;transform:translateY(30px) scale(.94) rotateX(8deg);filter:blur(10px)}}
 @keyframes cx-sheen{0%,62%{transform:translateX(-130%) skewX(-18deg)}100%{transform:translateX(230%) skewX(-18deg)}}
 @keyframes cx-border{from{background-position:150% 0}to{background-position:-50% 0}}
-@keyframes cx-flare{0%{transform:translateX(-38%);opacity:0}30%{opacity:.6}60%{opacity:.35}100%{transform:translateX(38%);opacity:0}}
 @keyframes cx-rip{to{transform:scale(1);opacity:0}}
 @keyframes cx-breathe{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue,#6d5ae6) 0%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--blue,#6d5ae6) 14%,transparent)}}
 
@@ -79,13 +78,7 @@ button:not(:disabled):active,.cta:active,.cta2:active{transform:scale(.97)}
 .modal:not([hidden]) form>*:nth-child(2){animation-delay:.06s}.modal:not([hidden]) form>*:nth-child(3){animation-delay:.1s}.modal:not([hidden]) form>*:nth-child(4){animation-delay:.14s}
 .modal:not([hidden]) form>*:nth-child(5){animation-delay:.18s}.modal:not([hidden]) form>*:nth-child(n+6){animation-delay:.22s}
 
-/* ---------- landing hero: anamorphic light streak + scroll depth ---------- */
-.hero{position:relative}
-.cx-flare{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
-.cx-flare i{position:absolute;left:-10%;right:-10%;top:42%;height:2px;opacity:0;
-  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--blue,#6d5ae6) 75%,#fff) 50%,transparent);
-  box-shadow:0 0 70px 14px color-mix(in srgb,var(--blue,#6d5ae6) 30%,transparent);animation:cx-flare 11s ease-in-out 1.4s infinite}
-.cx-flare i+i{top:66%;height:1px;animation-duration:15s;animation-delay:5s}
+/* ---------- landing hero: scroll depth ---------- */
 .orb-wrap{translate:0 calc(var(--cx-sy,0)*-.07px)}
 .hero .copy{translate:0 calc(var(--cx-sy,0)*.05px)}
 
@@ -101,3 +94,6 @@ html.cx-theming,html.cx-theming *,html.cx-theming *::before,html.cx-theming *::a
 @media (pointer:coarse){.cx-glow{display:none}}
 
 }
+
+/* the hero light streak was removed; hide it even if an old cached script still creates it */
+.cx-flare{display:none!important}
