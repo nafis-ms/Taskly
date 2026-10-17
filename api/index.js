@@ -10,7 +10,8 @@
  *   POST   /api            public   submit feedback {email,name,rating,text}  (text up to 1000 chars)
  *   GET    /api?public=1   public   approved ("kept") feedback only, for the website slider
  *   GET    /api            admin    list all feedback
- *   PATCH  /api?id=ID      admin    mark as "kept"
+ *   POST   /api            admin    add feedback straight to the slideshow (send status:"kept")
+ *   PATCH  /api?id=ID&status=kept|rejected|pending   admin   move feedback (default: kept)
  *   DELETE /api?id=ID      admin    remove
  * Admin requests send the header:  x-admin-key: <ADMIN_PASSWORD>
  */
@@ -80,7 +81,7 @@ module.exports = async (req, res) => {
           name: clean(b.name, 60) || "Anonymous",
           rating,
           text,
-          status: "pending",
+          status: isAdmin(req) && b.status === "kept" ? "kept" : "pending", /* only the admin can post straight to the slideshow */
         }),
       });
       return json(res, 201, { ok: true, item: toClient(rows[0]) });
@@ -105,7 +106,8 @@ module.exports = async (req, res) => {
     if (!id) return json(res, 400, { error: "Missing id" });
 
     if (req.method === "PATCH") {
-      await sb(`${TABLE}?id=eq.${id}`, { method: "PATCH", body: JSON.stringify({ status: "kept" }) });
+      const st = ["kept", "rejected", "pending"].includes(req.query.status) ? req.query.status : "kept";
+      await sb(`${TABLE}?id=eq.${id}`, { method: "PATCH", body: JSON.stringify({ status: st }) });
       return json(res, 200, { ok: true });
     }
     if (req.method === "DELETE") {
