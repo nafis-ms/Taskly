@@ -7,6 +7,8 @@
  */
 const BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+/* legacy service_role keys are JWTs (eyJ...) and go in Authorization too; new sb_secret_ keys must only be sent as apikey */
+const AUTH = /^eyJ/.test(KEY) ? { Authorization: `Bearer ${KEY}` } : {};
 const json = (res, code, body) => {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json");
@@ -26,7 +28,7 @@ module.exports = async (req, res) => {
   try {
     const u = await userOf(req);
     if (!u) return json(res, 401, { error: "Not logged in" });
-    const h = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+    const h = { apikey: KEY, ...AUTH, "Content-Type": "application/json" };
     if (req.method === "GET") {
       const r = await fetch(`${BASE}/rest/v1/taskly_data?user_id=eq.${u.id}&select=data,ts`, { headers: h });
       const rows = r.ok ? await r.json() : [];
