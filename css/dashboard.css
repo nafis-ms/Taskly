@@ -747,3 +747,7 @@ html:root[data-theme="dark"] body .dcard:not(.robot) {
   background: rgba(122, 192, 223, 0.18);
   backdrop-filter: blur(22px);
 }
+
+/* assistant default face: flat round eyes and a thick smile in the robot's own accent colour */
+.bot .norm .eye { fill: var(--bot-glow); filter: drop-shadow(0 0 4px var(--bot-glow)); }
+.bot .smile.norm { stroke: var(--bot-glow); stroke-width: 5.2; filter: drop-shadow(0 0 4px var(--bot-glow)); }
