@@ -86,3 +86,18 @@ html:root body .fbform textarea:focus{
 }
 html:root body .fbform [aria-invalid="true"]{border-color:#d92d20;box-shadow:0 0 0 4px rgba(217,45,32,.12)}
 html:root body .fbform input:-webkit-autofill{-webkit-text-fill-color:var(--ink);box-shadow:0 0 0 40px color-mix(in srgb,var(--surf,#fff) 95%,#fff) inset}
+
+/* feedback sent: success panel replaces the form inside the same card */
+.fbdone{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:12px 8px}
+.fbform.done>:not(.fbdone){display:none!important}
+.fbform.done .fbdone{display:flex;animation:pp-pop .7s var(--pp-ease) both}
+.fbdone-ic{width:84px;height:84px;margin-bottom:6px;fill:none;stroke:#34d399;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.fbdone-ic circle{stroke-dasharray:233;stroke-dashoffset:233;animation:pp-draw .9s .1s var(--pp-ease) forwards}
+.fbdone-ic path{stroke-dasharray:60;stroke-dashoffset:60;animation:pp-draw .5s .65s var(--pp-ease) forwards}
+html:root body .fbdone h3{margin:0;font-size:26px}
+.fbdone p{margin:0;max-width:26em;color:var(--muted)}
+.fbdone-btn{margin-top:8px;padding:11px 26px;border:1px solid var(--line);border-radius:999px;background:var(--surf);color:var(--ink);font:500 15px var(--font-body);cursor:pointer;transition:border-color .25s,transform .3s}
+.fbdone-btn:hover{border-color:var(--blue);transform:scale(1.04)}
+@keyframes pp-draw{to{stroke-dashoffset:0}}
+@keyframes pp-pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+@media (prefers-reduced-motion:reduce){.fbdone-ic circle,.fbdone-ic path{animation:none;stroke-dashoffset:0}.fbform.done .fbdone{animation:none}}
