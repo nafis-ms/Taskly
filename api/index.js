@@ -117,6 +117,7 @@ module.exports = async (req, res) => {
     res.setHeader("Allow", "GET, POST, PATCH, DELETE");
     return json(res, 405, { error: "Method not allowed" });
   } catch (e) {
-    return json(res, 500, { error: "Request failed" });
+    /* only admins get the real reason (e.g. a Supabase error); the public sees a generic message */
+    return json(res, 500, { error: "Request failed", detail: isAdmin(req) ? String(e && e.message || e).slice(0, 300) : undefined });
   }
 };
