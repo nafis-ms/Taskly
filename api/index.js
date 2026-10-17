@@ -19,6 +19,8 @@ const crypto = require("crypto");
 
 const URL_BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+/* legacy service_role keys are JWTs (eyJ...) and go in Authorization too; new sb_secret_ keys must only be sent as apikey */
+const AUTH = /^eyJ/.test(KEY) ? { Authorization: `Bearer ${KEY}` } : {};
 const TABLE = "taskly_feedback";
 
 const json = (res, code, body) => {
@@ -42,7 +44,7 @@ async function sb(path, opts = {}) {
     ...opts,
     headers: {
       apikey: KEY,
-      Authorization: `Bearer ${KEY}`,
+      ...AUTH,
       "Content-Type": "application/json",
       Prefer: "return=representation",
       ...(opts.headers || {}),
