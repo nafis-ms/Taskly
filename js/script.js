@@ -39,7 +39,7 @@
     },
     { rootMargin: "-40% 0px -55% 0px" },
   );
-  ["home", "features", "about", "contact"].forEach(function (id) {
+  ["home", "features", "about", "feedback", "contact"].forEach(function (id) {
     spy.observe(document.getElementById(id));
   });
   $$("[data-count]").forEach(function (el) {
@@ -762,13 +762,22 @@
 })();
 /* desktop: one scroll gesture = one section (phones keep normal smooth scrolling) */
 (function () {
-  var secs = ["home", "features", "about", "contact"].map(function (id) {
+  var secs = ["home", "features", "about", "feedback", "contact"].map(function (id) {
     return document.getElementById(id);
   });
   if (secs.some(function (s) { return !s; })) return;
   var desktop = matchMedia("(min-width:768px)");
   var reduce = matchMedia("(prefers-reduced-motion:reduce)");
   var busyUntil = 0, last = 0;
+  /* true when the pointer is over something (e.g. a long textarea) that can still scroll that way */
+  function inner(t, dir) {
+    for (; t && t.nodeType === 1 && t !== document.body; t = t.parentNode) {
+      if (t.scrollHeight > t.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(t).overflowY)) {
+        if (dir > 0 ? t.scrollTop + t.clientHeight < t.scrollHeight - 1 : t.scrollTop > 0) return true;
+      }
+    }
+    return false;
+  }
   function current() {
     var mid = innerHeight / 2, i;
     for (i = 0; i < secs.length; i++) {
@@ -783,6 +792,7 @@
       if (!desktop.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
       if (document.querySelector(".modal:not([hidden])")) return;
       var i = current(), dir = e.deltaY > 0 ? 1 : -1, r = secs[i].getBoundingClientRect();
+      if (inner(e.target, dir)) return;
       /* a section taller than the screen scrolls normally until its edge */
       if (dir > 0 && r.bottom > innerHeight + 2) return;
       if (dir < 0 && r.top < -2) return;
@@ -797,4 +807,229 @@
     },
     { passive: false },
   );
+})();
+
+/* feedback: submit card + slider card */
+(function () {
+  var form = document.getElementById("fbform");
+  if (!form) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var LIMIT = 1000, SHORT = 260, AUTOPLAY = 6000;
+  var STAR = "M10 1.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.5l-5.2 2.9L6 11.6 1.6 7.6l5.9-.7z";
+  var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var el = form.elements,
+    nameWrap = $("fbname"),
+    counter = $("fbcount"),
+    status = $("fbstatus"),
+    rateErr = $("fbrerr"),
+    btn = form.querySelector(".submit"),
+    card = $("fbview"),
+    track = $("fbtrack"),
+    dots = $("fbdots"),
+    nav = $("fbnav");
+  var items = [], mine = [], timer = null, hold = false, visible = false, holdT = 0, raf = 0;
+
+  /* ---------- slider (all user text goes in with textContent, never innerHTML) ---------- */
+  function stars(n) {
+    n = Math.min(5, Math.max(1, parseInt(n, 10) || 5));
+    var d = document.createElement("div"), h = "";
+    d.className = "fb-stars";
+    d.setAttribute("role", "img");
+    d.setAttribute("aria-label", n + " out of 5 stars");
+    for (var i = 1; i <= 5; i++)
+      h += '<svg viewBox="0 0 20 20" class="' + (i <= n ? "" : "off") + '" aria-hidden="true"><path d="' + STAR + '"/></svg>';
+    d.innerHTML = h;
+    return d;
+  }
+  function slide(it) {
+    var f = document.createElement("figure"),
+      q = document.createElement("blockquote"),
+      c = document.createElement("figcaption"),
+      text = String(it.text || "");
+    f.className = "fb-slide";
+    q.className = "fb-text";
+    c.className = "fb-by";
+    f.appendChild(stars(it.rating));
+    f.appendChild(q);
+    if (text.length > SHORT) {
+      var open = false, more = document.createElement("button");
+      more.type = "button";
+      more.className = "fb-more";
+      var paint = function () {
+        q.textContent = open ? text : text.slice(0, SHORT).replace(/\s+\S*$/, "") + "…";
+        more.textContent = open ? "Show less" : "Read more";
+        more.setAttribute("aria-expanded", open);
+      };
+      more.onclick = function () { open = !open; paint(); play(); };
+      paint();
+      f.appendChild(more);
+    } else q.textContent = text;
+    var who = document.createElement("span");
+    who.textContent = it.name || "Anonymous";
+    c.appendChild(who);
+    if (it.pending) {
+      var tag = document.createElement("span");
+      tag.className = "fb-tag";
+      tag.textContent = "Awaiting review";
+      c.appendChild(tag);
+    }
+    f.appendChild(c);
+    return f;
+  }
+  function note(msg) {
+    var f = document.createElement("figure"), q = document.createElement("blockquote");
+    f.className = "fb-slide fb-empty";
+    q.className = "fb-text";
+    q.textContent = msg;
+    f.appendChild(q);
+    return f;
+  }
+  function count() { return track.children.length; }
+  function index() { return Math.round(track.scrollLeft / (track.clientWidth || 1)); }
+  function mark() {
+    var i = index();
+    [].forEach.call(dots.children, function (d, k) { d.setAttribute("aria-current", k === i); });
+  }
+  function go(i) {
+    var n = count();
+    if (!n) return;
+    i = (i + n) % n;
+    track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? "auto" : "smooth" });
+  }
+  function render(emptyMsg) {
+    var list = mine.concat(items);
+    track.textContent = "";
+    dots.textContent = "";
+    if (!list.length) {
+      track.appendChild(note(emptyMsg || "No feedback yet. Yours could be the first."));
+      nav.hidden = true;
+      return;
+    }
+    list.forEach(function (it, i) {
+      track.appendChild(slide(it));
+      var d = document.createElement("button");
+      d.type = "button";
+      d.setAttribute("aria-label", "Show feedback " + (i + 1));
+      d.onclick = function () { go(i); play(); };
+      dots.appendChild(d);
+    });
+    nav.hidden = list.length < 2;
+    track.scrollLeft = 0;
+    mark();
+  }
+  function play() {
+    clearInterval(timer);
+    timer = null;
+    var expanded = track.querySelector('.fb-more[aria-expanded="true"]');
+    if (reduce || count() < 2 || hold || expanded || !visible || document.hidden) return;
+    timer = setInterval(function () { go(index() + 1); }, AUTOPLAY);
+  }
+  function pause(ms) {
+    hold = true;
+    clearTimeout(holdT);
+    play();
+    if (ms) holdT = setTimeout(function () { hold = false; play(); }, ms);
+  }
+  function resume() { clearTimeout(holdT); hold = false; play(); }
+  track.addEventListener("scroll", function () {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(mark);
+  });
+  $("fbprev").onclick = function () { go(index() - 1); play(); };
+  $("fbnext").onclick = function () { go(index() + 1); play(); };
+  card.addEventListener("mouseenter", function () { pause(); });
+  card.addEventListener("mouseleave", resume);
+  card.addEventListener("focusin", function () { pause(); });
+  card.addEventListener("focusout", resume);
+  card.addEventListener("touchstart", function () { pause(10000); }, { passive: true });
+  document.addEventListener("visibilitychange", play);
+  if ("IntersectionObserver" in window)
+    new IntersectionObserver(function (es) {
+      visible = es[0].isIntersecting;
+      play();
+    }, { threshold: 0.4 }).observe(card);
+  else visible = true;
+
+  render("Loading feedback…");
+  fetch("/api?public=1", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (d) {
+      items = (d.items || []).filter(function (x) { return x && typeof x.text === "string" && x.text; }).slice(0, 12);
+      render();
+      play();
+    })
+    .catch(function () { render(); });
+
+  /* ---------- form ---------- */
+  function anon() { return el.who.value === "anon"; }
+  function who() {
+    var a = anon();
+    nameWrap.hidden = a;
+    el.fname.disabled = a;
+    if (a) {
+      el.fname.removeAttribute("aria-invalid");
+      nameWrap.querySelector(".err").textContent = "";
+    }
+  }
+  [].forEach.call(form.querySelectorAll('input[name="who"]'), function (r) {
+    r.addEventListener("change", who);
+  });
+  [].forEach.call(form.querySelectorAll('input[name="rating"]'), function (r) {
+    r.addEventListener("change", function () { rateErr.textContent = ""; });
+  });
+  el.ftext.addEventListener("input", function () {
+    var n = el.ftext.value.length;
+    counter.textContent = n;
+    counter.parentNode.classList.toggle("max", n >= LIMIT);
+  });
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    status.className = "ok";
+    status.textContent = "";
+    var ok = true;
+    function chk(i, m, bad) {
+      var s = i.nextElementSibling;
+      if (bad) {
+        s.textContent = m;
+        i.setAttribute("aria-invalid", "true");
+        if (ok) i.focus();
+        ok = false;
+      } else {
+        s.textContent = "";
+        i.removeAttribute("aria-invalid");
+      }
+    }
+    var rating = parseInt(el.rating.value, 10) || 0;
+    rateErr.textContent = rating ? "" : "Choose a star rating.";
+    if (!rating) {
+      form.querySelector('input[name="rating"]').focus();
+      ok = false;
+    }
+    var name = anon() ? "" : el.fname.value.trim();
+    if (!anon()) chk(el.fname, "Enter your name.", name.length < 2);
+    var text = el.ftext.value.trim().slice(0, LIMIT);
+    chk(el.ftext, "Write a few words of feedback.", text.length < 3);
+    if (!ok) return;
+    btn.disabled = true;
+    status.textContent = "Sending…";
+    TasklyStore.addFeedback("", name, rating, text, function (sent) {
+      btn.disabled = false;
+      if (!sent) {
+        status.className = "ok bad";
+        status.textContent = "We couldn't send your feedback. Please try again.";
+        return;
+      }
+      status.textContent =
+        "Thank you" + (name ? ", " + name.split(" ")[0] : "") + "! Your feedback will show in the slider once we've reviewed it.";
+      mine.unshift({ rating: rating, name: name || "Anonymous", text: text, pending: true });
+      mine = mine.slice(0, 3);
+      render();
+      form.reset();
+      who();
+      counter.textContent = "0";
+      counter.parentNode.classList.remove("max");
+      play();
+    });
+  });
+  who();
 })();
