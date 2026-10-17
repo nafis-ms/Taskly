@@ -1019,8 +1019,7 @@
         status.textContent = "We couldn't send your feedback. Please try again.";
         return;
       }
-      status.textContent =
-        "Thank you" + (name ? ", " + name.split(" ")[0] : "") + "! Your feedback will show in the slider once we've reviewed it.";
+      status.textContent = "";
       mine.unshift({ rating: rating, name: name || "Anonymous", text: text, pending: true });
       mine = mine.slice(0, 3);
       render();
@@ -1028,8 +1027,15 @@
       who();
       counter.textContent = "0";
       counter.parentNode.classList.remove("max");
+      form.style.minHeight = form.offsetHeight + "px";
+      form.classList.add("done");
       play();
     });
   });
+  $("fbagain").onclick = function () {
+    form.classList.remove("done");
+    form.style.minHeight = "";
+    (anon() ? el.ftext : el.fname).focus();
+  };
   who();
 })();
