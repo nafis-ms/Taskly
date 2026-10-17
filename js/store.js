@@ -1,91 +1,89 @@
-/* Taskly shared data layer (localStorage; feedback goes online via /api). Used by the landing page, the app and admin.html */
-var TasklyStore = (function () {
-  function g(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } }
-  function s(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function hash(pw) {
-    var t = "taskly|" + pw, h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (var i = 0; i < t.length; i++) { var c = t.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
-  }
-  var day = function (t) { return new Date(t || Date.now()).toISOString().slice(0, 10); };
-  var S = {
-    hash: hash, day: day, get: g, set: s,
-    accounts: function () { return g("taskly:accounts", {}); },
-    saveAccounts: function (a) { s("taskly:accounts", a); },
-    signup: function (email, name) {
-      var a = S.accounts(), k = email.toLowerCase();
-      a[k] = a[k] || { email: email, created: Date.now(), days: [] };
-      if (name) a[k].name = name;
-      S.saveAccounts(a);
-    },
-    /* returns false when the account is suspended */
-    login: function (email) {
-      var a = S.accounts(), k = email.toLowerCase();
-      if (a[k] && a[k].suspended) return false;
-      if (!a[k]) a[k] = { email: email, created: Date.now(), days: [] };
-      S.saveAccounts(a);
-      return true;
-    },
-    touch: function (email, stats) {
-      var a = S.accounts(), k = email.toLowerCase(), u = a[k];
-      if (!u) u = a[k] = { email: email, created: Date.now(), days: [] };
-      u.last = Date.now();
-      var d = day();
-      if (u.days.indexOf(d) < 0) u.days = u.days.concat(d).slice(-60);
-      for (var x in stats || {}) u[x] = stats[x];
-      S.saveAccounts(a);
-      return !u.suspended;
-    },
-    chat: function () { return g("taskly:chat", {}); },
-    send: function (email, from, text) {
-      var c = S.chat(), k = email.toLowerCase();
-      (c[k] = c[k] || []).push({ from: from, text: text, ts: Date.now(), read: false });
-      s("taskly:chat", c);
-    },
-    markRead: function (email, reader) {
-      var c = S.chat(), k = email.toLowerCase();
-      (c[k] || []).forEach(function (m) { if (m.from !== reader) m.read = true; });
-      s("taskly:chat", c);
-    },
-    unread: function (email, reader) {
-      return (S.chat()[email.toLowerCase()] || []).filter(function (m) { return m.from !== reader && !m.read; }).length;
-    },
-    feedback: function () { return g("taskly:feedback", []); },
-    addFeedback: function (email, name, rating, text, cb) {
-      fetch("/api", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, name: name, rating: rating, text: text }) })
-        .then(function (r) { if (!r.ok) throw 0; cb && cb(true); })
-        .catch(function () { cb && cb(false); });
-    },
-    /* admin: pull the online inbox into the local cache that admin.html renders from */
-    adminKey: function () { try { return sessionStorage.getItem("taskly:key") || ""; } catch (e) { return ""; } },
-    pullFeedback: function (cb) {
-      fetch("/api", { headers: { "x-admin-key": S.adminKey() }, cache: "no-store" })
-        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-        .then(function (d) { s("taskly:feedback", d.items || []); cb && cb(true); })
-        .catch(function () { cb && cb(false); });
-    },
-    feedbackAct: function (id, method, cb, status) {
-      fetch("/api?id=" + encodeURIComponent(id) + (status ? "&status=" + status : ""), { method: method, headers: { "x-admin-key": S.adminKey() } })
-        .then(function (r) {
-          if (r.ok) return S.pullFeedback(function (g) { cb && cb(g, g ? "" : "Saved, but the list could not be refreshed."); });
-          return r.json().catch(function () { return {}; }).then(function (d) {
-            cb && cb(false, r.status === 401 ? "Session expired. Log out and log in again." : (d.detail || d.error || "Server error " + r.status));
-          });
-        }).catch(function () { cb && cb(false, "Can't reach the server."); });
-    },
-    /* admin login = ask the server (ADMIN_PASSWORD on Vercel); cb gets the HTTP status, 0 if unreachable */
-    adminLogin: function (pw, cb) {
-      fetch("/api", { headers: { "x-admin-key": pw }, cache: "no-store" })
-        .then(function (r) { cb(r.status); }).catch(function () { cb(0); });
-    },
-    adminAddFeedback: function (name, rating, text, cb) {
-      fetch("/api", { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": S.adminKey() },
-        body: JSON.stringify({ email: "", name: name, rating: rating, text: text, status: "kept" }) })
-        .then(function (r) { if (!r.ok) throw 0; S.pullFeedback(cb); }).catch(function () { cb && cb(false); });
+/**
+ * Admin: real accounts from Supabase Auth -> route: /api/users   (header x-admin-key: ADMIN_PASSWORD)
+ *   GET                          list accounts
+ *   POST ?id=ID&action=ban|unban|reset|delete
+ * Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSWORD (already set)
+ */
+const crypto = require("crypto");
+const BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const json = (res, code, body) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.end(JSON.stringify(body));
+};
+function isAdmin(req) {
+  const given = String(req.headers["x-admin-key"] || "");
+  const real = process.env.ADMIN_PASSWORD || "";
+  if (!real || !given) return false;
+  const a = crypto.createHash("sha256").update(given).digest();
+  const b = crypto.createHash("sha256").update(real).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
+
+module.exports = async (req, res) => {
+  if (!BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
+  if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
+  try {
+    if (req.method === "GET") {
+      const [ur, dr] = await Promise.all([
+        fetch(`${BASE}/auth/v1/admin/users?per_page=1000`, { headers: H }),
+        fetch(`${BASE}/rest/v1/taskly_data?select=user_id,data`, { headers: H }),
+      ]);
+      if (!ur.ok) return json(res, 500, { error: "Could not list users" });
+      const users = (await ur.json()).users || [];
+      const rows = dr.ok ? await dr.json() : [];
+      const stats = {};
+      rows.forEach((r) => {
+        const t = (r.data && r.data.todos) || [];
+        stats[r.user_id] = { tasks: t.length, done: t.filter((x) => x && x.done).length };
+      });
+      const now = Date.now();
+      return json(res, 200, {
+        items: users.map((u) => ({
+          id: u.id,
+          email: u.email,
+          name: (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || "",
+          created: new Date(u.created_at).getTime(),
+          last: u.last_sign_in_at ? new Date(u.last_sign_in_at).getTime() : 0,
+          suspended: !!(u.banned_until && new Date(u.banned_until).getTime() > now),
+          verified: !!(u.email_confirmed_at || u.confirmed_at),
+          provider: (u.app_metadata && u.app_metadata.provider) || "email",
+          tasks: (stats[u.id] || {}).tasks || 0,
+          done: (stats[u.id] || {}).done || 0,
+          days: [],
+        })),
+      });
     }
-  };
-  return S;
-})();
+    if (req.method === "POST") {
+      const id = String((req.query && req.query.id) || "").replace(/[^0-9a-f-]/gi, "");
+      const action = String((req.query && req.query.action) || "");
+      if (!id) return json(res, 400, { error: "Missing id" });
+      if (action === "ban" || action === "unban") {
+        const r = await fetch(`${BASE}/auth/v1/admin/users/${id}`, {
+          method: "PUT", headers: H, body: JSON.stringify({ ban_duration: action === "ban" ? "876000h" : "none" }),
+        });
+        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Update failed" });
+      }
+      if (action === "delete") {
+        await fetch(`${BASE}/rest/v1/taskly_data?user_id=eq.${id}`, { method: "DELETE", headers: H });
+        const r = await fetch(`${BASE}/auth/v1/admin/users/${id}`, { method: "DELETE", headers: H });
+        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Delete failed" });
+      }
+      if (action === "reset") {
+        const g = await fetch(`${BASE}/auth/v1/admin/users/${id}`, { headers: H });
+        const u = g.ok ? await g.json() : null;
+        if (!u || !u.email) return json(res, 404, { error: "User not found" });
+        const r = await fetch(`${BASE}/auth/v1/recover`, { method: "POST", headers: H, body: JSON.stringify({ email: u.email }) });
+        return r.ok ? json(res, 200, { ok: true }) : json(res, 500, { error: "Could not send reset email" });
+      }
+      return json(res, 400, { error: "Unknown action" });
+    }
+    res.setHeader("Allow", "GET, POST");
+    return json(res, 405, { error: "Method not allowed" });
+  } catch (e) {
+    return json(res, 500, { error: "Request failed" });
+  }
+};
