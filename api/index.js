@@ -7,7 +7,8 @@
  *   SUPABASE_SERVICE_ROLE_KEY   server-side only, never put it in front-end code
  *   ADMIN_PASSWORD              the password you use for admin.html
  *
- *   POST   /api            public   submit feedback {email,name,rating,text}
+ *   POST   /api            public   submit feedback {email,name,rating,text}  (text up to 1000 chars)
+ *   GET    /api?public=1   public   approved ("kept") feedback only, for the website slider
  *   GET    /api            admin    list all feedback
  *   PATCH  /api?id=ID      admin    mark as "kept"
  *   DELETE /api?id=ID      admin    remove
@@ -69,7 +70,7 @@ module.exports = async (req, res) => {
       let b = req.body;
       if (typeof b === "string") { try { b = JSON.parse(b); } catch (e) { b = {}; } }
       b = b || {};
-      const text = clean(b.text, 600);
+      const text = clean(b.text, 1000);
       const rating = Math.min(5, Math.max(1, parseInt(b.rating, 10) || 5));
       if (!text) return json(res, 400, { error: "Feedback text is required" });
       const rows = await sb(TABLE, {
@@ -83,6 +84,14 @@ module.exports = async (req, res) => {
         }),
       });
       return json(res, 201, { ok: true, item: toClient(rows[0]) });
+    }
+
+    /* public: approved ("kept") feedback for the landing page slider. No emails. */
+    if (req.method === "GET" && req.query && req.query.public) {
+      const rows = await sb(`${TABLE}?select=name,rating,text,created_at&status=eq.kept&order=created_at.desc&limit=12`);
+      return json(res, 200, {
+        items: rows.map((x) => ({ name: x.name, rating: x.rating, text: x.text, ts: new Date(x.created_at).getTime() })),
+      });
     }
 
     if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
