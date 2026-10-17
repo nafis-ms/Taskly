@@ -22,6 +22,7 @@
 
   var accountsCache = {}; /* lower-cased email -> account (from /api/users) */
   var feedbackCache = []; /* all feedback (from /api, admin) */
+  var api_lastErr = "";   /* last admin login failure, shown on the login screen */
 
   /* ---------- tiny localStorage helpers ---------- */
   function get(key, def) {
@@ -91,6 +92,7 @@
   function adminLogin(password, cb) {
     api("GET", "/api/users", null, String(password)).then(function (r) {
       if (r.status === 200) setAccounts(r.data.items);
+      else api_lastErr = r.status ? "HTTP " + r.status + (r.data.error ? ": " + r.data.error : "") + (r.data.detail ? " (" + r.data.detail + ")" : "") : "no response (network, blocked request or invalid characters in the password)";
       cb(r.status);
     });
   }
@@ -216,7 +218,7 @@
 
   window.TasklyStore = {
     get: get, set: set, day: day,
-    adminLogin: adminLogin, adminKey: adminKey,
+    adminLogin: adminLogin, adminKey: adminKey, lastError: function () { return api_lastErr; },
     pullFeedback: pullFeedback, feedback: function () { return feedbackCache; },
     feedbackAct: feedbackAct, adminAddFeedback: adminAddFeedback, addFeedback: addFeedback,
     accounts: function () { return accountsCache; }, accountAct: accountAct,
