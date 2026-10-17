@@ -69,7 +69,12 @@ var TasklyStore = (function () {
     },
     feedbackAct: function (id, method, cb, status) {
       fetch("/api?id=" + encodeURIComponent(id) + (status ? "&status=" + status : ""), { method: method, headers: { "x-admin-key": S.adminKey() } })
-        .then(function (r) { if (!r.ok) throw 0; S.pullFeedback(cb); }).catch(function () { cb && cb(false); });
+        .then(function (r) {
+          if (r.ok) return S.pullFeedback(function (g) { cb && cb(g, g ? "" : "Saved, but the list could not be refreshed."); });
+          return r.json().catch(function () { return {}; }).then(function (d) {
+            cb && cb(false, r.status === 401 ? "Session expired. Log out and log in again." : (d.detail || d.error || "Server error " + r.status));
+          });
+        }).catch(function () { cb && cb(false, "Can't reach the server."); });
     },
     /* admin login = ask the server (ADMIN_PASSWORD on Vercel); cb gets the HTTP status, 0 if unreachable */
     adminLogin: function (pw, cb) {
