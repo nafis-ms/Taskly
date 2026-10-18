@@ -8,9 +8,13 @@
  * Env vars (Vercel > Settings > Environment Variables):
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   already set
  *   CRON_SECRET        any long random text. The scheduler sends it as   Authorization: Bearer <CRON_SECRET>
- *   EMAIL_FROM         e.g.  Taskly <reminders@yourdomain.com>   (the address must be verified with your e-mail provider)
- *   BREVO_API_KEY      use Brevo   (free plan, you can verify a single sender address)      -- or --
- *   RESEND_API_KEY     use Resend  (needs a verified domain to e-mail other people)
+ *
+ *   FREE option (recommended): your own Gmail sends the e-mails through a Google Apps Script
+ *   GAS_MAIL_URL       the Apps Script "web app" URL (google-apps-script/taskly-mailer.gs)
+ *
+ *   Other providers (optional, used only if GAS_MAIL_URL is not set):
+ *   EMAIL_FROM         e.g.  Taskly <reminders@yourdomain.com>   (must be verified with the provider)
+ *   BREVO_API_KEY      Brevo  -- or --  RESEND_API_KEY   Resend (needs a verified domain)
  *   SITE_URL           optional, link in the e-mail button (default https://taskly-36.vercel.app)
  *   EMAIL_TIMEZONE     optional, used for reminders saved before time zones were stored (default Asia/Dhaka)
  *
@@ -68,11 +72,26 @@ function parseFrom() {
   return null;
 }
 function providerReady() {
-  if (!parseFrom()) return "EMAIL_FROM is missing or not like  Taskly <reminders@yourdomain.com>";
-  if (!process.env.BREVO_API_KEY && !process.env.RESEND_API_KEY) return "No e-mail provider: set BREVO_API_KEY or RESEND_API_KEY";
+  if (process.env.GAS_MAIL_URL) return "";
+  if (!parseFrom()) return "No e-mail sender: set GAS_MAIL_URL (free Gmail + Apps Script), or EMAIL_FROM with a provider key";
+  if (!process.env.BREVO_API_KEY && !process.env.RESEND_API_KEY) return "No e-mail provider: set GAS_MAIL_URL (free), or BREVO_API_KEY / RESEND_API_KEY";
   return "";
 }
 async function sendMail({ to, toName, subject, html, text }) {
+  /* free route: a Google Apps Script web app that sends through your own Gmail */
+  if (process.env.GAS_MAIL_URL) {
+    const r = await fetch(process.env.GAS_MAIL_URL, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ secret: process.env.CRON_SECRET, to, subject, html, text, name: "Taskly" }),
+    });
+    const raw = await r.text().catch(() => "");
+    let d = {};
+    try { d = JSON.parse(raw); } catch (e) {}
+    if (!r.ok || !d.ok) throw new Error(`Apps Script mailer: ${d.error || r.status + " " + raw.slice(0, 120).replace(/\s+/g, " ")}`);
+    return;
+  }
   const from = parseFrom();
   let r;
   if (process.env.BREVO_API_KEY) {
