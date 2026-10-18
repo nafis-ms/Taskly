@@ -81,7 +81,7 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
                         class="on">Dashboard</button><button data-v="us"
                         data-i="users">Users</button><button data-v="ch"
                         data-i="chat">Chat<b id="nc" hidden></b></button><button
-                        data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="fb" data-i="star">Feedback<b id="nf"
+                        data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="ci" data-i="mail">Contact Info</button><button data-v="fb" data-i="star">Feedback<b id="nf"
                             hidden></b></button><button data-v="st"
                         data-i="gear">Settings</button><button id="out"
                         data-i="out">Log out</button></nav>
@@ -117,7 +117,7 @@ function draw(){document.querySelectorAll("nav [data-v]").forEach(function(b){b.
  var u=unreadAll(),p=S.feedback().filter(function(x){return x.status==="pending"}).length;
  $("nc").hidden=!u;$("nc").textContent=u;$("nf").hidden=!p;$("nf").textContent=p;
  if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.id!=="")return;
- var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,st:sett})[v]();if(first)countUp()}
+ var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,ci:cinfo,st:sett})[v]();if(first)countUp()}
 function ov(){var s=stats(),days=[],i;for(i=13;i>=0;i--){var d=S.day(Date.now()-i*864e5);days.push([d.slice(5),s.a.filter(function(u){return S.day(u.created)===d}).length,s.a.filter(function(u){return u.days.indexOf(d)>-1}).length])}
  var mx=Math.max.apply(0,days.map(function(x){return Math.max(x[1],x[2])}).concat(1));
  function bars(k,l,cl){return'<div class="c ch"><div class="ct"><h3>'+l+'</h3><span class="lg">Last 14 days</span></div><div class="bars">'+days.map(function(x,j){return'<div class="'+cl+'" style="--i:'+j+';height:'+Math.max(x[k]/mx*100,4)+'%" data-t="'+x[0]+' · '+x[k]+'"></div>'}).join("")+'</div><div class="xl">'+days.map(function(x){return'<i>'+x[0].slice(3)+'</i>'}).join("")+'</div></div>'}
@@ -162,6 +162,31 @@ function fb(){var a=S.feedback().slice().reverse(),T=[["pending","Pending"],["ke
   S.adminAddFeedback($("an").value.trim(),+$("ar").value,t,function(g){if(g)return done();m.textContent="Could not add it. Try again."})}}
 function sett(){$("main").innerHTML='<h1>Settings</h1><div class="c" style="max-width:420px;display:flex;flex-direction:column;gap:10px"><b>Admin password</b><small>Set in Vercel as ADMIN_PASSWORD. To change it, update it there and redeploy.</small></div><div class="c" style="max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:10px"><b>Backup</b><button class="btn" id="bk">Download all Taskly data (JSON)</button></div>';
  $("bk").onclick=function(){var o={};["taskly:accounts","taskly:chat","taskly:feedback"].forEach(function(k){o[k]=S.get(k,null)});var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:"application/json"}));l.download="taskly-backup.json";l.click()}}
+/* ---------- Contact Info: edit the landing page "Contact us" details (saved to /api/contact) ---------- */
+var CI_DEF={lede:"Questions, feedback or a demo request? Send a message and a live chat window opens so our team can reply to you right here.",email:"hello@taskly.example",phone:"",address:"",hours:"Monday to Friday, 9:00 to 18:00"};
+function cinfoMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/taskly_settings.sql in the Supabase SQL Editor, then try again.":m}
+function cinfo(){if($("cif"))return;
+ $("main").innerHTML='<h1>Contact Info</h1><div class="c" id="cif" style="max-width:560px;display:flex;flex-direction:column;gap:12px"><small>This is what visitors see in the "Contact us" section of your landing page. Leave a field empty to hide it.</small>'
+ +'<label style="display:flex;flex-direction:column;gap:6px"><small>Intro text</small><textarea id="cil" rows="3" maxlength="400"></textarea></label>'
+ +'<label style="display:flex;flex-direction:column;gap:6px"><small>Email</small><input id="cie" type="email" maxlength="120" placeholder="hello@yourdomain.com"></label>'
+ +'<label style="display:flex;flex-direction:column;gap:6px"><small>Phone</small><input id="cip" maxlength="40" placeholder="+880 1XXX-XXXXXX"></label>'
+ +'<label style="display:flex;flex-direction:column;gap:6px"><small>Address</small><textarea id="cia" rows="2" maxlength="200"></textarea></label>'
+ +'<label style="display:flex;flex-direction:column;gap:6px"><small>Support hours</small><input id="cih" maxlength="120"></label>'
+ +'<div><button class="btn p" id="cis" disabled>Save changes</button> <span id="cim" style="margin-left:8px"></span></div></div>';
+ var put=function(i){$("cil").value=i.lede;$("cie").value=i.email;$("cip").value=i.phone;$("cia").value=i.address;$("cih").value=i.hours};
+ var msg=function(t,bad){var m=$("cim");if(m){m.textContent=t;m.style.color=bad?"var(--red)":""}};
+ $("cim").textContent="Loading…";
+ fetch("/api/contact",{cache:"no-store"}).then(function(r){return r.json().catch(function(){return{}})}).then(function(d){
+  var s=d.info||{},i={};for(var k in CI_DEF)i[k]=typeof s[k]==="string"?s[k]:CI_DEF[k];
+  if(!$("cif"))return;put(i);$("cis").disabled=false;msg("")}).catch(function(){if($("cif")){put(CI_DEF);$("cis").disabled=false;msg("Could not load the saved details.",1)}});
+ $("cis").onclick=function(){var b=$("cis"),i={lede:$("cil").value,email:$("cie").value.trim(),phone:$("cip").value.trim(),address:$("cia").value,hours:$("cih").value.trim()};
+  b.disabled=true;msg("Saving…");
+  fetch("/api/contact",{method:"PUT",cache:"no-store",headers:{"x-admin-key":S.adminKey(),"Content-Type":"application/json"},body:JSON.stringify(i)})
+  .then(function(r){return r.json().catch(function(){return{}}).then(function(d){
+   b.disabled=false;
+   if(r.ok)return msg("Saved. The landing page now shows these details.");
+   msg(cinfoMsg(d.detail||d.error||"Server error "+r.status),1)})})
+  .catch(function(){b.disabled=false;msg("Can't reach the server.",1)})}}
 /* ---------- Contact Chat: live conversations from the Contact us form (server-backed, no localStorage) ---------- */
 var L={sel:"",chats:[],ids:{},last:"",status:"open",unseen:0,lastTot:0,ac:null,err:"",ping:0};
 function A(m,qs,b){var o={method:m,cache:"no-store",headers:{"x-admin-key":S.adminKey()}};if(b){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(b)}
