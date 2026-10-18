@@ -166,7 +166,7 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
     `<td width="33%" style="padding:0 5px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0d1428;border:1px solid #22305a;border-radius:14px"><tr><td class="tk-chip" align="center" style="padding:16px 4px 12px"><div class="tk-num" style="font-size:34px;line-height:1;font-weight:800;color:#ffffff;letter-spacing:-1px">${pad(num)}</div><div style="margin-top:8px;font-size:10px;letter-spacing:2.4px;color:#7f92bd;font-weight:700">${label}</div></td></tr></table></td>`;
   const FONT = "'Poppins','Segoe UI',Helvetica,Arial,sans-serif";
   const HERO = `${SITE}/img/reminder-hero.gif`;
-  const pre = esc(`Your reminder: ${t.length > 60 ? t.slice(0, 57) + "..." : t} is due ${rel}.`);
+  const pre = esc(`Your reminder from Taskly: ${t.length > 60 ? t.slice(0, 57) + "..." : t} is due ${rel}.`);
 
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -183,7 +183,7 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head>
 <body style="margin:0;padding:0;background:#04060d;font-family:${FONT}">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#04060d">${pre}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#04060d">${pre}</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#04060d" style="background:#04060d"><tr><td align="center" style="padding:28px 12px">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px"><tr><td style="padding:1px;border-radius:22px;background:#1a56c7;background-image:linear-gradient(135deg,#0084ff,#7c5cff 55%,#22d3ee)">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#080d1c" style="background:#080d1c;border-radius:21px;overflow:hidden">
@@ -193,7 +193,8 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
 <tr><td class="tk-pad" style="padding:34px 36px 6px">
 <div class="tk-a1" style="font-size:12px;letter-spacing:3.2px;font-weight:700;color:#22d3ee"><span class="tk-dot" style="color:#22d3ee">&#9679;</span>&nbsp; REMINDER</div>
 <h1 class="tk-h tk-a2" style="margin:12px 0 10px;font-size:31px;line-height:1.2;font-weight:800;color:#ffffff;letter-spacing:-.6px;word-break:break-word">${esc(t)}</h1>
-<p class="tk-a3" style="margin:0;font-size:15.5px;line-height:1.65;color:#a3b3d6">Hi ${first}, here is the reminder you set in Taskly.</p>
+<p class="tk-a3" style="margin:0 0 12px;font-size:15.5px;line-height:1.7;color:#c3cfea">Hi ${first}, this is a friendly reminder from Taskly. The task you set is due <b style="color:#ffffff">${esc(rel)}</b>, on ${esc(dueText)}.</p>
+<p class="tk-a3" style="margin:0;font-size:14.5px;line-height:1.7;color:#a3b3d6">You asked us to remind you ${esc(leadText)} before the deadline, so here is your reminder.</p>
 </td></tr>
 
 <tr><td class="tk-pad tk-a3" style="padding:26px 31px 6px">
@@ -206,13 +207,15 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
 <div style="font-size:11px;letter-spacing:2.6px;font-weight:700;color:#6f82b0;margin-bottom:6px">DEADLINE</div>
 <div style="font-size:18px;line-height:1.4;font-weight:700;color:#ffffff">${esc(dueText)}</div>
 <div style="font-size:14px;font-weight:700;color:#22d3ee;margin-top:4px">${esc(rel)}</div>
-<div style="font-size:13px;line-height:1.55;color:#8798bd;margin-top:10px">You asked us to remind you ${esc(leadText)} before the deadline.</div>
 </td></tr></table>
 </td></tr>
 
-<tr><td align="center" class="tk-a4" style="padding:28px 36px 8px">
+<tr><td class="tk-pad tk-a4" style="padding:22px 36px 0"><p style="margin:0;font-size:14.5px;line-height:1.7;color:#a3b3d6">Open Taskly to review the task, mark it as done when you finish, or change the reminder if your plans have moved.</p></td></tr>
+
+<tr><td align="center" class="tk-a4" style="padding:22px 36px 6px">
 <a class="tk-btn" href="${SITE}/app.html" style="display:inline-block;padding:15px 38px;border-radius:999px;background:#0084ff;background-image:linear-gradient(110deg,#0084ff 0%,#7c5cff 50%,#0084ff 100%);background-size:200% 100%;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:.3px">Open Taskly &nbsp;&#8594;</a>
 </td></tr>
+<tr><td align="center" class="tk-pad" style="padding:6px 36px 0"><p style="margin:0;font-size:12.5px;line-height:1.6;color:#7f92bd">Or open this link: <a href="${SITE}/app.html" style="color:#6fb4ff;text-decoration:underline">${SITE.replace(/^https?:\/\//, "")}/app.html</a></p></td></tr>
 
 <tr><td class="tk-pad tk-a5" style="padding:26px 36px 8px">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0e1530;background-image:linear-gradient(135deg,#0c1f4a,#1a1240);border:1px solid #2a3770;border-radius:16px"><tr><td style="padding:22px 24px">
@@ -224,7 +227,7 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
 
 <tr><td class="tk-pad" style="padding:22px 36px 30px"><p style="margin:0;font-size:14.5px;line-height:1.6;color:#a3b3d6">With appreciation,<br><b style="color:#ffffff">The Taskly team</b></p></td></tr>
 
-<tr><td style="padding:16px 36px;background:#060a16;border-top:1px solid #16203f;font-size:12px;line-height:1.6;color:#6f82b0">You are receiving this e-mail because you set a reminder in Taskly.</td></tr>
+<tr><td style="padding:16px 36px;background:#060a16;border-top:1px solid #16203f;font-size:12px;line-height:1.6;color:#6f82b0">You are receiving this e-mail because you set a reminder in Taskly. This is a one-time message about that reminder, sent by Taskly (${SITE.replace(/^https?:\/\//, "")}).</td></tr>
 </table>
 </td></tr></table>
 </td></tr></table></body></html>`;
