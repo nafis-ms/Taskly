@@ -43,3 +43,4 @@
   html:root body .main > section{scroll-snap-align:none}
 }
 #developers{padding-bottom:40px}
+.pp-dots a[hidden]{display:none}
