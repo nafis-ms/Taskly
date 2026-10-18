@@ -44,3 +44,10 @@
 }
 #developers{padding-bottom:40px}
 .pp-dots a[hidden]{display:none}
+
+/* Log in button: spinner while signing in / loading the dashboard */
+.submit.is-loading,html:root body .submit.is-loading{position:relative;color:transparent!important;font-size:0!important;text-shadow:none!important;pointer-events:none;cursor:progress}
+.submit.is-loading::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:tk-spin .7s linear infinite}
+html[data-theme="dark"] .submit.is-loading::after{border-color:rgba(2,19,28,.3);border-top-color:#02131c}
+@keyframes tk-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.submit.is-loading::after{animation-duration:1.6s}}
