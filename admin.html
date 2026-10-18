@@ -81,7 +81,7 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
                         class="on">Dashboard</button><button data-v="us"
                         data-i="users">Users</button><button data-v="ch"
                         data-i="chat">Chat<b id="nc" hidden></b></button><button
-                        data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="ci" data-i="mail">Contact Info</button><button data-v="fb" data-i="star">Feedback<b id="nf"
+                        data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="ci" data-i="mail">Contact Info</button><button data-v="dv" data-i="users">Developers</button><button data-v="fb" data-i="star">Feedback<b id="nf"
                             hidden></b></button><button data-v="st"
                         data-i="gear">Settings</button><button id="out"
                         data-i="out">Log out</button></nav>
@@ -117,7 +117,7 @@ function draw(){document.querySelectorAll("nav [data-v]").forEach(function(b){b.
  var u=unreadAll(),p=S.feedback().filter(function(x){return x.status==="pending"}).length;
  $("nc").hidden=!u;$("nc").textContent=u;$("nf").hidden=!p;$("nf").textContent=p;
  if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.id!=="")return;
- var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,ci:cinfo,st:sett})[v]();if(first)countUp()}
+ var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,ci:cinfo,dv:devs,st:sett})[v]();if(first)countUp()}
 function ov(){var s=stats(),days=[],i;for(i=13;i>=0;i--){var d=S.day(Date.now()-i*864e5);days.push([d.slice(5),s.a.filter(function(u){return S.day(u.created)===d}).length,s.a.filter(function(u){return u.days.indexOf(d)>-1}).length])}
  var mx=Math.max.apply(0,days.map(function(x){return Math.max(x[1],x[2])}).concat(1));
  function bars(k,l,cl){return'<div class="c ch"><div class="ct"><h3>'+l+'</h3><span class="lg">Last 14 days</span></div><div class="bars">'+days.map(function(x,j){return'<div class="'+cl+'" style="--i:'+j+';height:'+Math.max(x[k]/mx*100,4)+'%" data-t="'+x[0]+' · '+x[k]+'"></div>'}).join("")+'</div><div class="xl">'+days.map(function(x){return'<i>'+x[0].slice(3)+'</i>'}).join("")+'</div></div>'}
@@ -186,6 +186,28 @@ function cinfo(){if($("cif"))return;
    b.disabled=false;
    if(r.ok)return msg("Saved. The landing page now shows these details.");
    msg(cinfoMsg(d.detail||d.error||"Server error "+r.status),1)})})
+  .catch(function(){b.disabled=false;msg("Can't reach the server.",1)})}}
+/* ---------- Developers: up to 3 cards for the landing page "Meet the developers" section (saved to /api/developers) ---------- */
+function devsMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/taskly_settings.sql in the Supabase SQL Editor, then try again.":m}
+function devs(){if($("dvf"))return;
+ var F=[["n","Name *","input",60,"Full name"],["r","Role","input",80,"e.g. Full-stack developer"],["b","Short bio","textarea",300,"A sentence or two"],["p","Photo link","input",300,"https://... (leave empty to show initials)"],["g","GitHub link","input",300,"https://github.com/..."],["l","LinkedIn link","input",300,"https://linkedin.com/in/..."],["w","Website link","input",300,"https://..."]];
+ var card=function(i){return'<div class="c" style="display:flex;flex-direction:column;gap:10px"><b>Developer '+(i+1)+'</b>'+F.map(function(f){var id="dv"+f[0]+i,at=' id="'+id+'" maxlength="'+f[3]+'" placeholder="'+f[4]+'"';
+  return'<label style="display:flex;flex-direction:column;gap:6px"><small>'+f[1]+'</small>'+(f[2]==="textarea"?'<textarea'+at+' rows="3"></textarea>':'<input'+at+'>')+'</label>'}).join("")+'</div>'};
+ $("main").innerHTML='<h1>Developers</h1><div id="dvf"><p style="max-width:640px"><small>Up to 3 developer cards are shown under "Contact us" on your landing page. A card with no name is not shown; if all three are empty the whole section is hidden.</small></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;max-width:1000px">'+card(0)+card(1)+card(2)+'</div><div style="margin-top:14px"><button class="btn p" id="dvs" disabled>Save changes</button> <span id="dvm" style="margin-left:8px"></span></div></div>';
+ var msg=function(t,bad){var m=$("dvm");if(m){m.textContent=t;m.style.color=bad?"var(--red)":""}};
+ var K={n:"name",r:"role",b:"bio",p:"photo",g:"github",l:"linkedin",w:"website"};
+ $("dvm").textContent="Loading…";
+ fetch("/api/developers",{cache:"no-store"}).then(function(r){return r.json().catch(function(){return{}})}).then(function(d){
+  if(!$("dvf"))return;var l=d.developers||[];
+  for(var i=0;i<3;i++)for(var k in K)$("dv"+k+i).value=(l[i]&&l[i][K[k]])||"";
+  $("dvs").disabled=false;msg("")}).catch(function(){if($("dvf")){$("dvs").disabled=false;msg("Could not load the saved developers.",1)}});
+ $("dvs").onclick=function(){var b=$("dvs"),list=[];
+  for(var i=0;i<3;i++){var o={};for(var k in K)o[K[k]]=$("dv"+k+i).value.trim();list.push(o)}
+  b.disabled=true;msg("Saving…");
+  fetch("/api/developers",{method:"PUT",cache:"no-store",headers:{"x-admin-key":S.adminKey(),"Content-Type":"application/json"},body:JSON.stringify({developers:list})})
+  .then(function(r){return r.json().catch(function(){return{}}).then(function(d){b.disabled=false;
+   if(r.ok)return msg("Saved. The landing page now shows "+((d.developers||[]).length||"no")+" developer card"+((d.developers||[]).length===1?"":"s")+".");
+   msg(devsMsg(d.detail||d.error||"Server error "+r.status),1)})})
   .catch(function(){b.disabled=false;msg("Can't reach the server.",1)})}}
 /* ---------- Contact Chat: live conversations from the Contact us form (server-backed, no localStorage) ---------- */
 var L={sel:"",chats:[],ids:{},last:"",status:"open",unseen:0,lastTot:0,ac:null,err:"",ping:0};
