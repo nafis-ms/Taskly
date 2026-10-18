@@ -587,6 +587,7 @@
       unit: v.unit.value,
       notified: false,
       repeat: v.repeat.value === "yearly" ? "yearly" : "",
+      tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } })(),
     };
     S.reminders.push(r);
     save();
