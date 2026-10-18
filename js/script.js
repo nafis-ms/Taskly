@@ -811,10 +811,16 @@
 })();
 /* desktop: one scroll gesture = one section (phones keep normal smooth scrolling) */
 (function () {
-  var secs = ["home", "features", "about", "feedback", "contact"].map(function (id) {
-    return document.getElementById(id);
-  });
-  if (secs.some(function (s) { return !s; })) return;
+  var ids = ["home", "features", "about", "feedback", "contact", "developers"];
+  var secs = [];
+  /* the developers section is hidden until a developer is added, so the list is rebuilt on every wheel event */
+  function refresh() {
+    secs = ids.map(function (id) { return document.getElementById(id); }).filter(function (s) {
+      return s && s.getClientRects().length;
+    });
+  }
+  refresh();
+  if (secs.length < 5) return;
   var desktop = matchMedia("(min-width:768px)");
   var reduce = matchMedia("(prefers-reduced-motion:reduce)");
   var busyUntil = 0, last = 0;
@@ -840,6 +846,7 @@
     function (e) {
       if (!desktop.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
       if (document.querySelector(".modal:not([hidden])")) return;
+      refresh();
       var i = current(), dir = e.deltaY > 0 ? 1 : -1, r = secs[i].getBoundingClientRect();
       if (inner(e.target, dir)) return;
       /* a section taller than the screen scrolls normally until its edge */
