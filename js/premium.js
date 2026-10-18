@@ -11,7 +11,7 @@
     (parent || d.body).appendChild(e);
     return e;
   }
-  var labels = { home: "Home", features: "Features", about: "About us", feedback: "Feedback", contact: "Contact" };
+  var labels = { home: "Home", features: "Features", about: "About us", feedback: "Feedback", contact: "Contact", developers: "Developers" };
   var secs = Object.keys(labels).map(function (id) { return d.getElementById(id); }).filter(Boolean);
 
   /* scroll progress, navbar depth, and the cross-fade value each section fades with */
@@ -76,6 +76,12 @@
       a.href = "#" + s.id;
       a.dataset.l = labels[s.id];
       a.setAttribute("aria-label", labels[s.id]);
+      /* the developers dot only appears once that section is shown (it stays hidden until a developer is added) */
+      if (s.id === "developers") {
+        var sync = function () { a.hidden = !s.getClientRects().length; };
+        sync();
+        d.addEventListener("taskly:developers", sync);
+      }
       a.addEventListener("click", function (e) {
         e.preventDefault();
         s.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
