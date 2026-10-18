@@ -119,7 +119,10 @@
     });
   });
   $("#mx").onclick = close;
-  $("#dc").onclick = close;
+  $("#dc").onclick = function () {
+    if (done.dataset.go) { location.href = "app.html"; return; }
+    close();
+  };
   modal.addEventListener("mousedown", function (e) {
     if (e.target === modal) close();
   });
@@ -207,6 +210,12 @@
       form.hidden = true;
       done.hidden = false;
       $("#dc").focus();
+      if (!r.needsConfirm) {
+        /* signed in straight away (no email confirmation needed): go to the dashboard */
+        done.dataset.go = "1";
+        try { localStorage.setItem("taskly:user", JSON.stringify({ email: em, name: nm })); } catch (e) {}
+        setTimeout(function () { location.href = "app.html"; }, 1200);
+      }
     });
   });
   var orb = $("#orb"),
@@ -464,7 +473,7 @@
     });
   });
   $("#lx").onclick = lclose;
-  $("#lc").onclick = lclose;
+  $("#lc").onclick = function () { location.href = "app.html"; };
   lm.addEventListener("mousedown", function (e) {
     if (e.target === lm) lclose();
   });
@@ -554,6 +563,7 @@
       lf.hidden = true;
       ld.hidden = false;
       $("#lc").focus();
+      setTimeout(function () { location.href = "app.html"; }, 900); /* logged in: open the dashboard */
     });
   });
   document.addEventListener("keydown", function (e) {
