@@ -65,7 +65,7 @@
       if (!list.length) return;
       grid.textContent = "";
       list.forEach(function (x) { if (x && x.name) grid.appendChild(card(x)); });
-      if (grid.children.length) sec.style.display = "";
+      if (grid.children.length) { sec.style.display = ""; document.dispatchEvent(new Event("taskly:developers")); }
     })
     .catch(function () {});
 })();
