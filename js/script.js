@@ -472,6 +472,14 @@
       lopen();
     });
   });
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) return;
+    var b = lf.querySelector(".submit");
+    b.style.minHeight = "";
+    b.disabled = false;
+    b.classList.remove("is-loading");
+    b.removeAttribute("aria-busy");
+  });
   $("#lx").onclick = lclose;
   $("#lc").onclick = function () { location.href = "app.html"; };
   lm.addEventListener("mousedown", function (e) {
@@ -533,10 +541,19 @@
     }
     var lb = lf.querySelector(".submit"),
       lem = v.le.value.trim();
-    lb.disabled = true;
-    TasklyAuth.signIn(lem, v.lp.value).then(function (r) {
+    lb.style.minHeight = lb.offsetHeight + "px"; /* keep the button size while the label is replaced by the spinner */
+    var lstop = function () {
+      lb.style.minHeight = "";
       lb.disabled = false;
+      lb.classList.remove("is-loading");
+      lb.removeAttribute("aria-busy");
+    };
+    lb.disabled = true;
+    lb.classList.add("is-loading"); /* spinner on the button until the dashboard has loaded */
+    lb.setAttribute("aria-busy", "true");
+    TasklyAuth.signIn(lem, v.lp.value).then(function (r) {
       if (r.error) {
+        lstop();
         var msg = TasklyAuth.friendly(r.error);
         if (/confirm your email/i.test(msg)) {
           lerr(v.le, msg);
@@ -554,16 +571,14 @@
         return;
       }
       if (!TasklyStore.login(lem)) {
+        lstop();
         TasklyAuth.signOut();
         lerr(v.le, "This account is suspended. Contact support.");
         v.le.focus();
         return;
       }
-      $("#ldm").textContent = "Welcome back! You are logged in as " + lem + ".";
-      lf.hidden = true;
-      ld.hidden = false;
-      $("#lc").focus();
-      setTimeout(function () { location.href = "app.html"; }, 900); /* logged in: open the dashboard */
+      /* logged in: no pop-up, the button keeps spinning while the dashboard loads */
+      location.href = "app.html";
     });
   });
   document.addEventListener("keydown", function (e) {
