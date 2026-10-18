@@ -31,3 +31,15 @@
   #features .lede,#about .lede{font-size:15px}
   .fx-card p{font-size:13px}
 }
+
+/* Scrolling fix: sections still snap into place, but a section taller than the screen
+   (short laptops) can always be scrolled through to its bottom. */
+@media (min-width:768px){
+  html:root{scroll-snap-type:y proximity}
+  html:root body .main > section{scroll-snap-stop:normal}
+}
+@media (min-width:768px) and (max-height:820px){
+  html:root{scroll-snap-type:none}
+  html:root body .main > section{scroll-snap-align:none}
+}
+#developers{padding-bottom:40px}
