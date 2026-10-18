@@ -1,0 +1,18 @@
+/* Dark theme: readable text in every dropdown ("option box") in the app.
+   The open list of a <select> ignores the semi-transparent field background, so it needs its own solid colors. */
+html[data-theme="dark"] select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea { color-scheme: dark; }
+html[data-theme="dark"] select option,
+html[data-theme="dark"] select optgroup,
+html:root[data-theme="dark"] body .panel select option,
+html:root[data-theme="dark"] body .st-item select option {
+  background-color: #0b1b28;
+  color: #eaf6fb;
+}
+html[data-theme="dark"] select option:checked,
+html[data-theme="dark"] select option:hover {
+  background-color: #1d4f6e;
+  color: #ffffff;
+}
+html[data-theme="dark"] select option:disabled { color: #7f94a1; }
