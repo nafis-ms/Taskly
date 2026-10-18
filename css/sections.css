@@ -51,3 +51,8 @@
 html[data-theme="dark"] .submit.is-loading::after{border-color:rgba(2,19,28,.3);border-top-color:#02131c}
 @keyframes tk-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.submit.is-loading::after{animation-duration:1.6s}}
+
+/* Log in modal: Google button sits right above the Log in button */
+#lform .g-btn{margin:14px 0 0}
+#lform .g-or{margin:12px 0 2px}
+#lform .g-or + .submit{margin-top:12px!important}
