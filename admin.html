@@ -8,6 +8,7 @@
         <style>
 :root{--page:#cfd0d3;--app:#fff;--main:#ececee;--card:#fff;--c2:#f4f4f5;--line:rgba(0,0,0,.07);--ink:#101012;--mut:#6c6c74;--acc:#101012;--ai:#fff;--blue:#101012;--b1:#0b0b0c;--b2:#26262a;--b3:#c9c9ce;--chip:#efeff1;--red:#d6363b;--green:#1f9d63;--sh:0 40px 90px rgba(0,0,0,.2);--orb:rgba(255,255,255,.9)}
 [data-theme=dark]{--page:#0b0a09;--app:#161513;--main:#1b1a18;--card:#252321;--c2:#2d2b28;--line:rgba(255,255,255,.07);--ink:#f5efe6;--mut:#9b9286;--acc:#f2a54a;--ai:#1a1206;--blue:#f2a54a;--b1:#ffd48a;--b2:#d98a2b;--b3:#4a453d;--chip:#34312d;--red:#ff6b6f;--green:#4ade9b;--sh:0 40px 100px rgba(0,0,0,.7),0 0 120px rgba(242,165,74,.08);--orb:rgba(242,165,74,.22)}
+[data-theme=dark] select,[data-theme=dark] input{color-scheme:dark}[data-theme=dark] option,[data-theme=dark] optgroup{background:var(--c2);color:var(--ink)}
 *{box-sizing:border-box}html{transition:background .5s}body{margin:0;min-height:100vh;background:var(--page);color:var(--ink);font:14px/1.45 "Poppins",system-ui,sans-serif;overflow-x:hidden;transition:background .5s,color .4s}
 .orb{position:fixed;width:60vmax;height:60vmax;border-radius:50%;background:radial-gradient(circle,var(--orb),transparent 65%);filter:blur(30px);pointer-events:none;animation:drift 18s ease-in-out infinite alternate}.o1{left:-20vmax;top:-25vmax}.o2{right:-25vmax;bottom:-30vmax;animation-duration:24s}
 @keyframes drift{to{transform:translate3d(8vmax,6vmax,0) scale(1.15)}}
