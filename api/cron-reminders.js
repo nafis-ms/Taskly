@@ -156,6 +156,8 @@ Open Taskly: ${SITE}/app.html
 With appreciation,
 The Taskly team
 
+Questions or feedback? Just reply to this e-mail, we read every message. If this e-mail ever landed in your Spam folder, please mark it as "Not spam" so your next reminders reach your inbox.
+
 You are receiving this e-mail because you set a reminder in Taskly.`;
 
   /* time left, as a snapshot at the moment the e-mail is sent */
@@ -225,7 +227,8 @@ You are receiving this e-mail because you set a reminder in Taskly.`;
 </td></tr></table>
 </td></tr>
 
-<tr><td class="tk-pad" style="padding:22px 36px 30px"><p style="margin:0;font-size:14.5px;line-height:1.6;color:#a3b3d6">With appreciation,<br><b style="color:#ffffff">The Taskly team</b></p></td></tr>
+<tr><td class="tk-pad" style="padding:22px 36px 12px"><p style="margin:0;font-size:14.5px;line-height:1.6;color:#a3b3d6">With appreciation,<br><b style="color:#ffffff">The Taskly team</b></p></td></tr>
+<tr><td class="tk-pad" style="padding:0 36px 26px"><p style="margin:0;font-size:13px;line-height:1.65;color:#8798bd">Questions or feedback? Just reply to this e-mail, we read every message. If this e-mail ever landed in your Spam folder, please mark it as &ldquo;Not spam&rdquo; so your next reminders reach your inbox.</p></td></tr>
 
 <tr><td style="padding:16px 36px;background:#060a16;border-top:1px solid #16203f;font-size:12px;line-height:1.6;color:#6f82b0">You are receiving this e-mail because you set a reminder in Taskly. This is a one-time message about that reminder, sent by Taskly (${SITE.replace(/^https?:\/\//, "")}).</td></tr>
 </table>
