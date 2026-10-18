@@ -100,7 +100,7 @@
     $("#ml").textContent =
       plan ?
         "Create your account to continue."
-      : "Free for 14 days. No card needed.";
+      : "Free to use. No card needed.";
     modal.hidden = false;
     document.body.style.overflow = "hidden";
     setTimeout(function () {
