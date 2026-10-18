@@ -148,6 +148,8 @@ var TasklyAuth = (function () {
   document.head.appendChild(st);
 
   /* on every page load: pick up a session (also the one coming back from Google / the email link) */
+  /* arriving from the email-confirmation link or Google sign-in (not a password reset) */
+  var fromLink = location.hash.indexOf("access_token") > -1 && location.hash.indexOf("type=recovery") === -1;
   boot().then(function (c) {
     return c.auth.getSession().then(function (r) {
       var s = r.data && r.data.session;
@@ -155,6 +157,8 @@ var TasklyAuth = (function () {
         publish(s.user);
         if (location.hash.indexOf("access_token") > -1 || location.hash.indexOf("error") > -1)
           history.replaceState(null, "", location.pathname + location.search);
+        /* confirmed or signed in with Google: go straight to the dashboard instead of the landing page */
+        if (fromLink && !guard) location.replace("app.html");
       } else if (guard) {
         clearLocal();
         location.replace("index.html");
