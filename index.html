@@ -412,16 +412,22 @@
           <h2>Contact us</h2>
           <div class="contact">
             <div class="cinfo">
-              <p class="lede">
+              <p class="lede" id="ci-lede">
                 Questions, feedback or a demo request? Send a message and a live
                 chat window opens so our team can reply to you right here.
               </p>
-              <p>
-                <b>Email</b><br /><a href="mailto:hello@taskly.example"
+              <p id="ci-email-w">
+                <b>Email</b><br /><a id="ci-email" href="mailto:hello@taskly.example"
                   >hello@taskly.example</a
                 >
               </p>
-              <p><b>Support hours</b><br />Monday to Friday, 9:00 to 18:00</p>
+              <p id="ci-phone-w" style="display:none">
+                <b>Phone</b><br /><a id="ci-phone" href="#"></a>
+              </p>
+              <p id="ci-addr-w" style="display:none">
+                <b>Address</b><br /><span id="ci-addr"></span>
+              </p>
+              <p id="ci-hours-w"><b>Support hours</b><br /><span id="ci-hours">Monday to Friday, 9:00 to 18:00</span></p>
             </div>
             <form class="card cform" id="cform" novalidate>
               <label
@@ -544,6 +550,7 @@
     <script src="js/store.js?v=2"></script>
     <script src="js/auth.js?v=2"></script>
     <script src="js/script.js?v=24"></script>
+    <script src="js/contact-info.js?v=1" defer></script>
     <script src="js/premium.js?v=1" defer></script>
     <script src="js/plexus.js?v=2"></script>
     <script src="js/chat.js?v=1"></script>
