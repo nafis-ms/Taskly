@@ -34,7 +34,19 @@
     ".sp-f button,.sp-s{padding:8px 14px;border:0;border-radius:10px;background:var(--blue,#0084ff);color:#fff;font-weight:600;cursor:pointer}.sp-f button:disabled,.sp-s:disabled{opacity:.6;cursor:default}" +
     ".sp-fb{flex:1;padding:14px;display:flex;flex-direction:column;gap:8px;font-size:13px;overflow:auto}#spC{display:flex;flex-direction:column;flex:1;min-height:0}.sp-fb[hidden],#spC[hidden]{display:none}" +
     ".sp-fb textarea{flex:1;min-height:90px;padding:8px;border-radius:10px;border:1px solid var(--line,#ccc);background:transparent;color:inherit;font:inherit;resize:none}.sp-fb select{padding:8px;border-radius:10px;border:1px solid var(--line,#ccc);background:transparent;color:inherit}" +
-    "@media (max-width:768px){.sp-p{left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom,0px));height:min(480px,calc(100vh - 110px))}}";
+    ".sp-ttl{display:none}.sp-t{order:1}.sp-x{order:2}" +
+    "html.sp-lock,html.sp-lock body{overflow:hidden;overscroll-behavior:none}" +
+    /* phones: the chat becomes a full-screen page (the bottom tab bar is covered while it is open) */
+    "@media (max-width:768px){" +
+    ".sp-p{left:0;right:0;top:0;bottom:auto;width:100%;height:100vh;height:100dvh;max-width:none;border-radius:0;border:0;box-shadow:none;" +
+    "background:linear-gradient(var(--surf2,rgba(255,255,255,.96)),var(--surf2,rgba(255,255,255,.96))),var(--bg,#fff);padding-top:env(safe-area-inset-top,0px)}" +
+    ".sp-h{flex-wrap:wrap}.sp-ttl{display:block;order:0;flex:1;padding:14px 16px;font:700 18px var(--font-head,inherit)}" +
+    ".sp-x{order:1;width:52px;font-size:30px}.sp-t{order:2;flex:1 0 100%}.sp-t button{padding:12px 8px;font-size:14px}" +
+    ".sp-m{padding:14px 14px 8px;gap:8px}.sp-m div{font-size:15.5px;max-width:86%;padding:10px 14px;border-radius:18px}" +
+    ".sp-ty{padding:0 16px 6px}" +
+    ".sp-f{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));gap:8px}.sp-f input{font-size:16px;padding:12px 14px;border-radius:22px}.sp-f button{padding:0 20px;border-radius:22px;font-size:15px}" +
+    ".sp-fb{padding:16px}.sp-fb textarea,.sp-fb select{font-size:16px}.sp-s{padding:12px 16px}" +
+    "}";
   document.head.appendChild(st);
 
   /* ---------- markup ---------- */
@@ -42,7 +54,7 @@
   var p = document.createElement("div"); p.className = "sp-p"; p.hidden = true;
   p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Chat with admin");
   p.innerHTML =
-    '<div class="sp-h"><div class="sp-t"><button type="button" class="on" data-t="c">Chat with admin</button><button type="button" data-t="f">Feedback</button></div><button type="button" class="sp-x" id="spX" aria-label="Close chat">\u00d7</button></div>' +
+    '<div class="sp-h"><div class="sp-ttl">Chat with admin</div><div class="sp-t"><button type="button" class="on" data-t="c">Chat with admin</button><button type="button" data-t="f">Feedback</button></div><button type="button" class="sp-x" id="spX" aria-label="Close chat">\u00d7</button></div>' +
     '<div id="spC"><div class="sp-m" id="spM" aria-live="polite"></div><div class="sp-ty" id="spTy"></div>' +
     '<div class="sp-f"><input id="spI" placeholder="Type a message" maxlength="1000" autocomplete="off"><button type="button" id="spS">Send</button></div></div>' +
     '<div class="sp-fb" id="spF" hidden><label>Rating <select id="spR"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label><textarea id="spT" placeholder="Tell us what you think" maxlength="600"></textarea><button type="button" class="sp-s" id="spSend">Send feedback</button><span id="spOk"></span></div>';
@@ -112,15 +124,28 @@
   }
 
   /* ---------- panel open / close ---------- */
+  var phone = function () { return matchMedia("(max-width:768px)").matches; };
+  /* on phones follow the visible area, so the message box stays above the on-screen keyboard */
+  function fit() {
+    if (p.hidden) return;
+    if (phone()) {
+      var vv = window.visualViewport;
+      p.style.height = (vv ? vv.height : window.innerHeight) + "px";
+      p.style.top = (vv ? vv.offsetTop : 0) + "px";
+      var m = $("spM"); if (m && document.activeElement === $("spI")) m.scrollTop = 1e9;
+    } else { p.style.height = ""; p.style.top = ""; }
+  }
   function setOpen(on) {
     p.hidden = !on; btn.setAttribute("aria-expanded", on ? "true" : "false");
-    if (on) { render(); poll(); setTimeout(function () { if (tab === "c") $("spI").focus(); }, 30); }
+    document.documentElement.classList.toggle("sp-lock", on && phone());
+    if (on) { fit(); render(); poll(); setTimeout(function () { if (tab === "c" && !phone()) $("spI").focus(); }, 30); }
     setBadge();
   }
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fit); visualViewport.addEventListener("scroll", fit); }
+  addEventListener("resize", function () { if (!p.hidden) { document.documentElement.classList.toggle("sp-lock", phone()); fit(); } });
   btn.onclick = function () { setOpen(p.hidden); };
   $("spX").onclick = function () { setOpen(false); btn.focus(); };
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !p.hidden) { setOpen(false); btn.focus(); } });
-  document.addEventListener("mousedown", function (e) { if (!p.hidden && !p.contains(e.target) && !btn.contains(e.target) && matchMedia("(max-width:768px)").matches) setOpen(false); });
 
   p.querySelectorAll(".sp-t button").forEach(function (t) {
     t.onclick = function () {
