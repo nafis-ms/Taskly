@@ -19,59 +19,12 @@
  *   PATCH /api/chat?id=ID&status=open|closed           resolve / reopen
  *   DELETE /api/chat?id=ID                             delete the conversation
  */
-const crypto = require("crypto");
+const { crypto, configured, json, allow, adminOk, sb, body, one: clean, multi: msgText, detail } = require("./_lib");
 
-const URL_BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
-const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-/* legacy service_role keys are JWTs (eyJ...) and go in Authorization too; new sb_secret_ keys must only be sent as apikey */
-const AUTH = /^eyJ/.test(KEY) ? { Authorization: `Bearer ${KEY}` } : {};
 const CHATS = "taskly_chats";
 const MSGS = "taskly_chat_messages";
 const COOKIE = "taskly_chat";
 const TYPING_MS = 5000;
-
-const json = (res, code, body) => {
-  res.statusCode = code;
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "no-store");
-  res.end(JSON.stringify(body));
-};
-
-function isAdmin(req) {
-  const given = String(req.headers["x-admin-key"] || "");
-  const real = process.env.ADMIN_PASSWORD || "";
-  if (!real || !given) return false;
-  const a = crypto.createHash("sha256").update(given).digest();
-  const b = crypto.createHash("sha256").update(real).digest();
-  return crypto.timingSafeEqual(a, b);
-}
-
-async function sb(path, opts = {}) {
-  const r = await fetch(`${URL_BASE}/rest/v1/${path}`, {
-    ...opts,
-    headers: {
-      apikey: KEY,
-      ...AUTH,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-      ...(opts.headers || {}),
-    },
-  });
-  const text = await r.text();
-  if (!r.ok) throw new Error(text || `Supabase ${r.status}`);
-  return text ? JSON.parse(text) : [];
-}
-
-/* single-line fields */
-const clean = (s, n) => String(s || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, n);
-/* message text: keep line breaks, drop other control characters, limit blank lines */
-const msgText = (s, n) =>
-  String(s || "")
-    .replace(/\r\n?/g, "\n")
-    .replace(/[\u0000-\u0009\u000b-\u001f]/g, " ")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim()
-    .slice(0, n);
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO = /^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})$/;
@@ -160,6 +113,7 @@ async function visitor(req, res, q, b) {
     const name = clean(b.name, 60);
     const email = clean(b.email, 120).toLowerCase();
     if (name.length < 2 || !EMAIL.test(email)) return json(res, 400, { error: "This conversation has ended.", code: "nochat" });
+    if (!allow(req, "newchat", 5, 60 * 60000)) return json(res, 429, { error: "Too many new conversations. Please try again later." });
     const fresh = crypto.randomBytes(24).toString("hex");
     chat = (await sb(CHATS, { method: "POST", body: JSON.stringify({ token: fresh, name, email }) }))[0];
     setCookie(req, res, fresh);
@@ -263,26 +217,19 @@ async function admin(req, res, q, b) {
 }
 
 module.exports = async (req, res) => {
-  if (!URL_BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
+  if (!configured()) return json(res, 500, { error: "Server is not configured" });
   try {
     const q = req.query || {};
-    let b = {};
-    if (req.method === "POST") {
-      b = req.body;
-      if (typeof b === "string") {
-        try { b = JSON.parse(b); } catch (e) { b = {}; }
-      }
-      b = b || {};
-    }
+    const b = req.method === "POST" ? body(req) : {};
     const adminCall =
       q.admin || req.method === "PATCH" || req.method === "DELETE" || (req.method === "POST" && (b.action === "reply" || b.action === "atyping"));
     if (adminCall) {
-      if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
+      if (!adminOk(req)) return json(res, 401, { error: "Unauthorized" });
       return await admin(req, res, q, b);
     }
     return await visitor(req, res, q, b);
   } catch (e) {
     /* only the admin gets the real reason (e.g. a missing table); visitors see a generic message */
-    return json(res, 500, { error: "Request failed", detail: isAdmin(req) ? String((e && e.message) || e).slice(0, 300) : undefined });
+    return json(res, 500, { error: "Request failed", detail: detail(req, e) });
   }
 };

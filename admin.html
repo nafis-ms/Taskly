@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport"
-            content="width=device-width,initial-scale=1"><title>Taskly
+            content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236d5ae6'/%3E%3Cpath d='M17 33l10 10 20-22' fill='none' stroke='white' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"><title>Taskly
             Admin</title><link rel="preconnect"
             href="https://fonts.googleapis.com"><link
             href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
@@ -80,8 +80,7 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
                         id="lg2"></i>Taskly <small>Admin</small></div><nav>
                     <button data-v="ov" data-i="home"
                         class="on">Dashboard</button><button data-v="us"
-                        data-i="users">Users</button><button data-v="ch"
-                        data-i="chat">Chat<b id="nc" hidden></b></button><button
+                        data-i="users">Users</button><button
                         data-v="lc" data-i="mail">Contact Chat<b id="nl" hidden></b></button><button data-v="ci" data-i="mail">Contact Info</button><button data-v="dv" data-i="users">Developers</button><button data-v="fb" data-i="star">Feedback<b id="nf"
                             hidden></b></button><button data-v="st"
                         data-i="gear">Settings</button><button id="out"
@@ -89,9 +88,9 @@ table{width:100%;border-collapse:separate;border-spacing:0 6px}th{text-align:lef
                 <div class="me"><div class="av">A</div><b>Admin</b><small>Taskly
                         workspace</small></div></aside><main
                 id="main"></main></div>
-        <script src="js/store.js?v=2"></script>
+        <script src="js/store.js?v=3"></script>
         <script>
-var S=TasklyStore,$=function(i){return document.getElementById(i)},v="ov",cur="",f="";
+var S=TasklyStore,$=function(i){return document.getElementById(i)},v="ov",f="";
 var h=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var ago=function(t){if(!t)return"never";var m=Math.round((Date.now()-t)/6e4);return m<1?"just now":m<60?m+"m ago":m<1440?Math.round(m/60)+"h ago":Math.round(m/1440)+"d ago"};
 var IC={home:"M3.5 11L12 4l8.5 7M5.5 9.5V20h13V9.5",users:"M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.3M15.5 4.2a3.5 3.5 0 0 1 0 6.6",chat:"M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z",star:"M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z",gear:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1",out:"M10 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H10M15 8l4 4-4 4M19 12H9.5",pulse:"M3 12h4l3-8 4 16 3-8h4",clock:"M12 7.5V12l3 2M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17",plus:"M12 5v14M5 12h14",ban:"M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM6 6l12 12",mail:"M4 6h16v12H4zM4 7l8 6 8-6",sun:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",moon:"M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z",bolt:"M13 3L5 13h6l-1 8 8-10h-6z"};
@@ -113,40 +112,29 @@ $("out").onclick=function(){sessionStorage.removeItem("taskly:adm");location.rel
 document.querySelectorAll("nav [data-v]").forEach(function(b){b.onclick=function(){v=b.dataset.v;draw()}});
 function stats(){var a=Object.values(S.accounts()),n=Date.now(),w=function(ms){return a.filter(function(u){return u.last&&n-u.last<ms}).length};
  return{a:a,total:a.length,now:w(12e4),d1:w(864e5),d7:w(6048e5),d30:w(2592e6),sus:a.filter(function(u){return u.suspended}).length,new7:a.filter(function(u){return n-u.created<6048e5}).length}}
-function unreadAll(){var c=S.chat(),n=0;for(var k in c)n+=S.unread(k,"admin");return n}
+function unreadAll(){return L.chats.reduce(function(n,c){return n+(c.unread||0)},0)}
 function draw(){document.querySelectorAll("nav [data-v]").forEach(function(b){b.classList.toggle("on",b.dataset.v===v)});
- var u=unreadAll(),p=S.feedback().filter(function(x){return x.status==="pending"}).length;
- $("nc").hidden=!u;$("nc").textContent=u;$("nf").hidden=!p;$("nf").textContent=p;
+ var p=S.feedback().filter(function(x){return x.status==="pending"}).length;
+ $("nf").hidden=!p;$("nf").textContent=p;
  if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.id!=="")return;
- var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,ch:ch,lc:lc,fb:fb,ci:cinfo,dv:devs,st:sett})[v]();if(first)countUp()}
+ var first=v!==shown;shown=v;$("main").classList.toggle("anim",first);({ov:ov,us:us,lc:lc,fb:fb,ci:cinfo,dv:devs,st:sett})[v]();if(first)countUp()}
 function ov(){var s=stats(),days=[],i;for(i=13;i>=0;i--){var d=S.day(Date.now()-i*864e5);days.push([d.slice(5),s.a.filter(function(u){return S.day(u.created)===d}).length,s.a.filter(function(u){return u.days.indexOf(d)>-1}).length])}
  var mx=Math.max.apply(0,days.map(function(x){return Math.max(x[1],x[2])}).concat(1));
  function bars(k,l,cl){return'<div class="c ch"><div class="ct"><h3>'+l+'</h3><span class="lg">Last 14 days</span></div><div class="bars">'+days.map(function(x,j){return'<div class="'+cl+'" style="--i:'+j+';height:'+Math.max(x[k]/mx*100,4)+'%" data-t="'+x[0]+' · '+x[k]+'"></div>'}).join("")+'</div><div class="xl">'+days.map(function(x){return'<i>'+x[0].slice(3)+'</i>'}).join("")+'</div></div>'}
  var top=s.a.slice().sort(function(a,b){return(b.tasks||0)-(a.tasks||0)}).slice(0,5);
  var st=[["users","Total accounts",s.total],["pulse","Active now",s.now],["clock","Active today",s.d1],["bolt","Active 7 days",s.d7],["star","Active 30 days",s.d30],["plus","New this week",s.new7],["ban","Suspended",s.sus],["mail","Unread messages",unreadAll()]];
- $("main").innerHTML='<div><h1>Quick Stats</h1><p class="sub">Live statistics for your Taskly workspace.</p></div><div class="stats">'+st.map(function(x,n){return'<div class="c stat'+(n===0?" hl":"")+'"><span class="ico">'+ic(x[0])+'</span><strong data-n="'+x[2]+'">'+x[2]+'</strong><small>'+x[1]+'</small></div>'}).join("")+'</div><div class="two">'+bars(1,"New signups","")+'<div class="c"><div class="ct"><h3>Most active</h3><span class="lg">by tasks</span></div>'+(top.map(function(u){return'<div class="rw"><span class="av">'+h((u.name||u.email)[0].toUpperCase())+'</span><div><b>'+h(u.name||u.email.split("@")[0])+'</b><small>'+h(u.email)+'</small></div><span class="tag">'+(u.tasks||0)+' tasks</span></div>'}).join("")||'<p class="lg">No accounts yet.</p>')+'</div></div>'+bars(2,"Active users","g")}
+ $("main").innerHTML='<div><h1>Quick Stats</h1><p class="sub">Live statistics for your Taskly workspace.</p></div><div class="stats">'+st.map(function(x,n){return'<div class="c stat'+(n===0?" hl":"")+'"><span class="ico">'+ic(x[0])+'</span><strong data-n="'+x[2]+'">'+x[2]+'</strong><small>'+x[1]+'</small></div>'}).join("")+'</div><div class="two">'+bars(1,"New signups","")+'<div class="c"><div class="ct"><h3>Most active</h3><span class="lg">by tasks</span></div>'+(top.map(function(u){return'<div class="rw"><span class="av">'+h((u.name||u.email)[0].toUpperCase())+'</span><div><b>'+h(u.name||u.email.split("@")[0])+'</b><small>'+h(u.email)+'</small></div><span class="tag">'+(u.tasks||0)+' tasks</span></div>'}).join("")||'<p class="lg">No accounts yet.</p>')+'</div></div>'+bars(2,"Last active (accounts by day)","g")}
 function us(){var q=($("q")||{}).value||"",fl=($("fl")||{}).value||"all",n=Date.now();
- var a=stats().a.filter(function(u){var on=u.last&&n-u.last<12e4;return(h(u.email+u.name).toLowerCase().indexOf(q.toLowerCase())>-1)&&(fl==="all"||(fl==="active"&&on)||(fl==="sus"&&u.suspended)||(fl==="idle"&&!on&&!u.suspended))}).sort(function(a,b){return b.created-a.created});
- $("main").innerHTML='<h1>Users</h1><div class="top"><input id="q" placeholder="Search name or email" value="'+h(q)+'"><select id="fl">'+[["all","All"],["active","Active now"],["idle","Not active"],["sus","Suspended"]].map(function(o){return'<option value="'+o[0]+'"'+(o[0]===fl?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select><button class="btn" id="ex">Export CSV</button></div><div class="c" style="overflow:auto"><table><tr><th>User</th><th>Joined</th><th>Last seen</th><th>Tasks</th><th>Status</th><th></th></tr>'+a.map(function(u){var on=u.last&&n-u.last<12e4;return'<tr><td>'+h(u.name||"")+'<br><small>'+h(u.email)+'</small></td><td>'+S.day(u.created)+'</td><td>'+ago(u.last)+'</td><td>'+(u.done||0)+'/'+(u.tasks||0)+'</td><td><span class="tag '+(u.suspended?"red":on?"on-t":"")+'">'+(u.suspended?"Suspended":on?"Active":"Idle")+'</span></td><td style="white-space:nowrap"><button class="btn" data-a="m" data-e="'+h(u.email)+'">Message</button> <button class="btn" data-a="s" data-e="'+h(u.email)+'">'+(u.suspended?"Restore":"Suspend")+'</button> <button class="btn" data-a="p" data-e="'+h(u.email)+'">Reset pw</button> <button class="btn d" data-a="x" data-e="'+h(u.email)+'">Delete</button></td></tr>'}).join("")+'</table>'+(a.length?"":"<p>No accounts match.</p>")+'</div>';
+ var a=stats().a.filter(function(u){var on=u.last&&n-u.last<12e4;return((u.email+" "+u.name).toLowerCase().indexOf(q.toLowerCase())>-1)&&(fl==="all"||(fl==="active"&&on)||(fl==="sus"&&u.suspended)||(fl==="idle"&&!on&&!u.suspended))}).sort(function(a,b){return b.created-a.created});
+ $("main").innerHTML='<h1>Users</h1><div class="top"><input id="q" placeholder="Search name or email" value="'+h(q)+'"><select id="fl">'+[["all","All"],["active","Active now"],["idle","Not active"],["sus","Suspended"]].map(function(o){return'<option value="'+o[0]+'"'+(o[0]===fl?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select><button class="btn" id="ex">Export CSV</button></div><div class="c" style="overflow:auto"><table><tr><th>User</th><th>Joined</th><th>Last seen</th><th>Tasks</th><th>Status</th><th></th></tr>'+a.map(function(u){var on=u.last&&n-u.last<12e4;return'<tr><td>'+h(u.name||"")+'<br><small>'+h(u.email)+'</small></td><td>'+S.day(u.created)+'</td><td>'+ago(u.last)+'</td><td>'+(u.done||0)+'/'+(u.tasks||0)+'</td><td><span class="tag '+(u.suspended?"red":on?"on-t":"")+'">'+(u.suspended?"Suspended":on?"Active":"Idle")+'</span></td><td style="white-space:nowrap"><button class="btn" data-a="s" data-e="'+h(u.email)+'">'+(u.suspended?"Restore":"Suspend")+'</button> <button class="btn" data-a="p" data-e="'+h(u.email)+'">Reset pw</button> <button class="btn d" data-a="x" data-e="'+h(u.email)+'">Delete</button></td></tr>'}).join("")+'</table>'+(a.length?"":"<p>No accounts match.</p>")+'</div>';
  $("q").oninput=function(){var p=this.selectionStart;us();$("q").focus();$("q").setSelectionRange(p,p)};$("fl").onchange=us;
  $("ex").onclick=function(){var r=[["email","name","joined","last seen","tasks","done","suspended"]].concat(stats().a.map(function(u){return[u.email,u.name||"",S.day(u.created),u.last?new Date(u.last).toISOString():"",u.tasks||0,u.done||0,!!u.suspended]}));
   var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([r.map(function(x){return x.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(",")}).join("\n")],{type:"text/csv"}));l.download="taskly-users.csv";l.click()};
  document.querySelectorAll("[data-a]").forEach(function(b){b.onclick=function(){var e=b.dataset.e,k=e.toLowerCase(),ac=S.accounts(),t=b.dataset.a;
-  if(t==="m"){cur=k;v="ch";return draw()}
   if(t==="s"){return S.accountAct(ac[k].id,ac[k].suspended?"unban":"ban",function(ok,m){if(!ok)alert(m);us()})}
   if(t==="p"){if(!confirm("Send a password reset email to "+e+"?"))return;return S.accountAct(ac[k].id,"reset",function(ok,m){alert(ok?"Reset email sent.":m)})}
   if(t==="x"){if(!confirm("Permanently delete "+e+" and their data?"))return;return S.accountAct(ac[k].id,"delete",function(ok,m){if(!ok)alert(m);us()})}
   us()}})}
-function ch(){var c=S.chat(),ac=S.accounts(),ks=Object.keys(ac).concat(Object.keys(c).filter(function(k){return!ac[k]}));
- ks.sort(function(a,b){var x=(c[a]||[]).slice(-1)[0],y=(c[b]||[]).slice(-1)[0];return(y?y.ts:0)-(x?x.ts:0)});if(!cur&&ks.length)cur=ks[0];
- var ms=c[cur]||[];if(cur)S.markRead(cur,"admin");
- $("main").innerHTML='<h1>Chat</h1><div class="chat"><div style="overflow:auto">'+ks.map(function(k){var n=S.unread(k,"admin");return'<div class="th'+(k===cur?" on":"")+'" data-k="'+h(k)+'"><span>'+h((ac[k]&&ac[k].name)||k)+'</span>'+(n?'<b class="tag red">'+n+'</b>':"")+'</div>'}).join("")+(ks.length?"":'<p style="padding:12px">No users yet.</p>')+'<div class="th" id="bc" style="color:var(--blue)">Broadcast to all</div></div><div><div class="th" style="cursor:default"><b>'+h(cur||"Select a user")+'</b>'+(cur?'<button class="btn d" id="dc">Clear</button>':"")+'</div><div class="ms" id="ms">'+ms.map(function(m){return'<div class="'+(m.from==="admin"?"a":"")+'" title="'+new Date(m.ts).toLocaleString()+'">'+h(m.text)+'</div>'}).join("")+'</div><div class="row"><input id="ci" placeholder="Reply…" maxlength="500"><button class="btn p" id="cs">Send</button></div></div></div>';
- var m=$("ms");m.scrollTop=1e9;
- document.querySelectorAll(".th[data-k]").forEach(function(t){t.onclick=function(){cur=t.dataset.k;ch()}});
- function go(){var t=$("ci").value.trim();if(!t||!cur)return;S.send(cur,"admin",t);ch();$("ci").focus()}
- $("cs").onclick=go;$("ci").onkeydown=function(e){if(e.key==="Enter")go()};
- $("bc").onclick=function(){var t=prompt("Message to send to every user:");if(!t)return;Object.keys(ac).forEach(function(k){S.send(k,"admin",t)});ch()};
- if($("dc"))$("dc").onclick=function(){if(!confirm("Clear this conversation?"))return;var c2=S.chat();delete c2[cur];S.set("taskly:chat",c2);ch()}}
 function fb(){var a=S.feedback().slice().reverse(),T=[["pending","Pending"],["kept","Kept (in slideshow)"],["rejected","Rejected Feedback"]];
  if(!T.some(function(t){return t[0]===f}))f="pending";
  var cnt=function(s){return a.filter(function(x){return x.status===s}).length},list=a.filter(function(x){return x.status===f});
@@ -161,11 +149,11 @@ function fb(){var a=S.feedback().slice().reverse(),T=[["pending","Pending"],["ke
  document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){if(!confirm("Delete this feedback permanently?"))return;act(b,b.dataset.r,"DELETE")}});
  $("aa").onclick=function(){var m=$("am"),t=$("at").value.trim();if(t.length<3)return m.textContent="Write the feedback text.";m.textContent="Adding…";
   S.adminAddFeedback($("an").value.trim(),+$("ar").value,t,function(g){if(g)return done();m.textContent="Could not add it. Try again."})}}
-function sett(){$("main").innerHTML='<h1>Settings</h1><div class="c" style="max-width:420px;display:flex;flex-direction:column;gap:10px"><b>Admin password</b><small>Set in Vercel as ADMIN_PASSWORD. To change it, update it there and redeploy.</small></div><div class="c" style="max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:10px"><b>Backup</b><button class="btn" id="bk">Download all Taskly data (JSON)</button></div>';
- $("bk").onclick=function(){var o={};["taskly:accounts","taskly:chat","taskly:feedback"].forEach(function(k){o[k]=S.get(k,null)});var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:"application/json"}));l.download="taskly-backup.json";l.click()}}
+function sett(){$("main").innerHTML='<h1>Settings</h1><div class="c" style="max-width:420px;display:flex;flex-direction:column;gap:10px"><b>Admin password</b><small>Set in Vercel as ADMIN_PASSWORD. To change it, update it there and redeploy.</small></div><div class="c" style="max-width:420px;margin-top:12px;display:flex;flex-direction:column;gap:10px"><b>Backup</b><button class="btn" id="bk">Download accounts + feedback (JSON)</button></div>';
+ $("bk").onclick=function(){S.pullFeedback(function(){var o={exportedAt:new Date().toISOString(),accounts:Object.values(S.accounts()),feedback:S.feedback()};var l=document.createElement("a");l.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:"application/json"}));l.download="taskly-backup.json";l.click()})}}
 /* ---------- Contact Info: edit the landing page "Contact us" details (saved to /api/contact) ---------- */
 var CI_DEF={lede:"Questions, feedback or a demo request? Send a message and a live chat window opens so our team can reply to you right here.",email:"hello@taskly.example",phone:"",address:"",hours:"Monday to Friday, 9:00 to 18:00"};
-function cinfoMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/taskly_settings.sql in the Supabase SQL Editor, then try again.":m}
+function cinfoMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/setup.sql in the Supabase SQL Editor, then try again.":m}
 function cinfo(){if($("cif"))return;
  $("main").innerHTML='<h1>Contact Info</h1><div class="c" id="cif" style="max-width:560px;display:flex;flex-direction:column;gap:12px"><small>This is what visitors see in the "Contact us" section of your landing page. Leave a field empty to hide it.</small>'
  +'<label style="display:flex;flex-direction:column;gap:6px"><small>Intro text</small><textarea id="cil" rows="3" maxlength="400"></textarea></label>'
@@ -189,7 +177,7 @@ function cinfo(){if($("cif"))return;
    msg(cinfoMsg(d.detail||d.error||"Server error "+r.status),1)})})
   .catch(function(){b.disabled=false;msg("Can't reach the server.",1)})}}
 /* ---------- Developers: up to 3 cards for the landing page "Meet the developers" section (saved to /api/developers) ---------- */
-function devsMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/taskly_settings.sql in the Supabase SQL Editor, then try again.":m}
+function devsMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The settings table was not found. Run sql/setup.sql in the Supabase SQL Editor, then try again.":m}
 function devs(){if($("dvf"))return;
  var F=[["n","Name *","input",60,"Full name"],["r","Role","input",80,"e.g. Full-stack developer"],["b","Short bio","textarea",300,"A sentence or two"],["p","Photo link","input",300,"https://... (leave empty to show initials)"],["g","GitHub link","input",300,"https://github.com/..."],["l","LinkedIn link","input",300,"https://linkedin.com/in/..."],["w","Website link","input",300,"https://..."]];
  var card=function(i){return'<div class="c" style="display:flex;flex-direction:column;gap:10px"><b>Developer '+(i+1)+'</b>'+F.map(function(f){var id="dv"+f[0]+i,at=' id="'+id+'" maxlength="'+f[3]+'" placeholder="'+f[4]+'"';
@@ -214,7 +202,7 @@ function devs(){if($("dvf"))return;
 var L={sel:"",chats:[],ids:{},last:"",status:"open",unseen:0,lastTot:0,ac:null,err:"",ping:0};
 function A(m,qs,b){var o={method:m,cache:"no-store",headers:{"x-admin-key":S.adminKey()}};if(b){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(b)}
  return fetch("/api/chat"+(qs||""),o).then(function(r){return r.json().catch(function(){return{}}).then(function(d){if(!r.ok){var e=new Error(d.detail||d.error||"Server error "+r.status);e.status=r.status;throw e}return d})})}
-function lcMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The chat tables were not found. Run the chat SQL setup in Supabase, then reload this page.":m}
+function lcMsg(m){return/does not exist|42P01|PGRST205|schema cache/.test(m)?"The chat tables were not found. Run sql/setup.sql in the Supabase SQL Editor, then reload this page.":m}
 function lcErr(m){var e=$("lcerr");if(e)e.textContent=m?lcMsg(m):""}
 document.addEventListener("click",function(){try{L.ac=L.ac||new(window.AudioContext||window.webkitAudioContext)();if(L.ac.state==="suspended")L.ac.resume()}catch(e){}});
 function lcChime(){if(!L.ac||L.ac.state!=="running")return;try{var t=L.ac.currentTime;[[660,0],[880,.12]].forEach(function(n){var o=L.ac.createOscillator(),g=L.ac.createGain(),a=t+n[1];o.type="sine";o.frequency.value=n[0];g.gain.setValueAtTime(.0001,a);g.gain.linearRampToValueAtTime(.06,a+.02);g.gain.exponentialRampToValueAtTime(.0001,a+.4);o.connect(g);g.connect(L.ac.destination);o.start(a);o.stop(a+.45)})}catch(e){}}
@@ -256,6 +244,6 @@ function lcPoll(){return A("GET","?admin=1").then(function(d){L.err="";L.chats=d
  L.chats.forEach(function(c){if(!(v==="lc"&&c.id===L.sel))tot+=c.unread});
  $("nl").hidden=!tot;$("nl").textContent=tot;document.title=(tot?"("+tot+") ":"")+"Taskly Admin";
  if(tot>L.lastTot)lcChime();L.lastTot=tot;if(v==="lc"&&$("lcl"))lcList()}).catch(function(e){if(e.status!==401){L.err=e.message;if(v==="lc"&&$("lcl")&&!L.chats.length)lcList()}})}
-setInterval(function(){if(ok)lcPoll()},3000);setInterval(function(){if(ok&&v==="lc"&&L.sel)lcMsgs()},2000);
-addEventListener("storage",function(){if(ok)draw()});setInterval(function(){if(ok)S.pullFeedback()},15000);setInterval(function(){if(ok)draw()},5000);if(ok)S.pullFeedback(draw);gate();
+setInterval(function(){if(ok&&!document.hidden)lcPoll()},4000);setInterval(function(){if(ok&&!document.hidden&&v==="lc"&&L.sel)lcMsgs()},2500);
+setInterval(function(){if(ok&&!document.hidden)S.pullFeedback()},30000);setInterval(function(){if(ok&&!document.hidden)draw()},5000);if(ok)S.pullFeedback(draw);gate();
 </script><script src="js/cinematic.js?v=2" defer></script></body></html>

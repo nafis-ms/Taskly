@@ -1,4 +1,4 @@
-/* In-app: activity heartbeat + Chat panel (opened from the sidebar "Chat" button).
+/* In-app: Chat panel (opened from the sidebar "Chat" button).
    Chat goes through /api/chat, the same server-backed conversation the admin sees under "Contact Chat",
    so messages reach the admin from any device. The Feedback tab sends feedback via TasklyStore.addFeedback. */
 (function () {
@@ -6,14 +6,6 @@
   try { u = JSON.parse(localStorage.getItem("taskly:user")); } catch (e) {}
   if (u && typeof u === "object") { email = u.email || ""; name = u.name || ""; }
   if (!S || !email) return;
-
-  /* ---------- heartbeat (unchanged): keeps "last active" up to date and signs out suspended accounts ---------- */
-  function beat() {
-    var d = S.get("taskly:data:v1", {}), t = d.todos || [];
-    var ok = S.touch(email, { tasks: t.length, done: t.filter(function (x) { return x.done; }).length, rem: (d.reminders || []).length });
-    if (!ok) { try { localStorage.removeItem("taskly:user"); } catch (e) {} location.href = "index.html"; }
-  }
-  beat(); setInterval(beat, 30000);
 
   var btn = document.getElementById("chatBtn");
   if (!btn) return;

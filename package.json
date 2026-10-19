@@ -1,0 +1,7 @@
+{
+  "name": "taskly",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Taskly: to-do list, reminders and schedule. Static site + Vercel serverless API + Supabase.",
+  "engines": { "node": ">=18" }
+}

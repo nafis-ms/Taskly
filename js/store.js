@@ -1,24 +1,17 @@
 /**
  * Taskly browser store -> window.TasklyStore
- * Loaded by index.html, app.html and admin.html (js/store.js?v=2).
- *
- * NOTE: this file must run in the BROWSER. It used to contain a copy of api/users.js
- * (server code), which left TasklyStore undefined and broke the admin login.
+ * Loaded by index.html, app.html and admin.html.
  *
  * Talks to the Vercel API:
  *   /api         feedback (public submit, admin list / keep / reject / delete / add)
  *   /api/users   real accounts from Supabase Auth (admin only)
  * Admin requests send the header  x-admin-key: <ADMIN_PASSWORD>
- * Chat between a signed-in user and the admin (support widget) is kept in localStorage ("taskly:chat").
  */
 (function () {
   "use strict";
 
   var KEY_ADMIN = "taskly:key"; /* sessionStorage: admin password for this tab */
   var KEY_FLAG = "taskly:adm";  /* sessionStorage: admin is logged in */
-  var KEY_CHAT = "taskly:chat";
-  var KEY_SEEN = "taskly:chatseen";
-  var KEY_ACC = "taskly:accounts";
 
   var accountsCache = {}; /* lower-cased email -> account (from /api/users) */
   var feedbackCache = []; /* all feedback (from /api, admin) */
@@ -143,36 +136,6 @@
     });
   }
 
-  /* ---------- local account bookkeeping (browser side) ---------- */
-  function localAccounts() { return get(KEY_ACC, {}) || {}; }
-  function signup(email, name) {
-    var k = lc(email); if (!k) return false;
-    var a = localAccounts();
-    if (!a[k]) a[k] = { email: email, name: name || "", created: Date.now(), last: Date.now() };
-    else if (name) a[k].name = name;
-    set(KEY_ACC, a);
-    return true;
-  }
-  function login(email) {
-    var k = lc(email); if (!k) return false;
-    var a = localAccounts();
-    if (a[k] && a[k].suspended) return false;
-    if (!a[k]) a[k] = { email: email, name: "", created: Date.now() };
-    a[k].last = Date.now();
-    set(KEY_ACC, a);
-    return true;
-  }
-  /* in-app heartbeat; false = this account was suspended -> app signs the user out */
-  function touch(email, stats) {
-    var k = lc(email); if (!k) return false;
-    var a = localAccounts();
-    if (a[k] && a[k].suspended) return false;
-    if (!a[k]) a[k] = { email: email, name: "", created: Date.now() };
-    a[k].last = Date.now();
-    if (stats) { a[k].tasks = stats.tasks || 0; a[k].done = stats.done || 0; a[k].rem = stats.rem || 0; }
-    set(KEY_ACC, a);
-    return true;
-  }
   function accountAct(id, action, cb) {
     api("POST", "/api/users?id=" + encodeURIComponent(id) + "&action=" + encodeURIComponent(action)).then(function (r) {
       if (r.status === 200) {
@@ -190,39 +153,11 @@
     });
   }
 
-  /* ---------- support chat (user <-> admin), kept in localStorage ---------- */
-  function chat() { return get(KEY_CHAT, {}) || {}; }
-  function send(email, from, text) {
-    var k = lc(email), t = String(text || "").trim().slice(0, 500);
-    if (!k || !t) return false;
-    var c = chat();
-    var list = c[k] || [];
-    var ts = Date.now();
-    if (list.length && list[list.length - 1].ts >= ts) ts = list[list.length - 1].ts + 1;
-    list.push({ from: from === "admin" ? "admin" : "user", text: t, ts: ts });
-    c[k] = list.slice(-200);
-    set(KEY_CHAT, c);
-    return true;
-  }
-  function markRead(email, role) {
-    var k = lc(email), list = chat()[k] || [];
-    var seen = get(KEY_SEEN, {}) || {};
-    seen[k + "|" + role] = list.length ? list[list.length - 1].ts : 0;
-    set(KEY_SEEN, seen);
-  }
-  function unread(email, role) {
-    var k = lc(email), other = role === "admin" ? "user" : "admin";
-    var seen = (get(KEY_SEEN, {}) || {})[k + "|" + role] || 0;
-    return (chat()[k] || []).filter(function (m) { return m.from === other && m.ts > seen; }).length;
-  }
-
   window.TasklyStore = {
     get: get, set: set, day: day,
     adminLogin: adminLogin, adminKey: adminKey, lastError: function () { return api_lastErr; },
     pullFeedback: pullFeedback, feedback: function () { return feedbackCache; },
     feedbackAct: feedbackAct, adminAddFeedback: adminAddFeedback, addFeedback: addFeedback,
-    accounts: function () { return accountsCache; }, accountAct: accountAct,
-    signup: signup, login: login, touch: touch,
-    chat: chat, send: send, unread: unread, markRead: markRead
+    accounts: function () { return accountsCache; }, accountAct: accountAct
   };
 })();

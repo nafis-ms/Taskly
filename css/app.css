@@ -738,7 +738,7 @@ html[data-theme="dark"] .mdel { color: #f87171; border-color: rgba(248, 113, 113
 @media (max-width: 720px) { .hist-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* Settings dialog (VS Code style: category list + settings list) */
-.settings-box { width: min(900px, 100%); height: min(640px, calc(100vh - 32px)); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.settings-box { width: min(900px, 100%); height: min(640px, calc(100vh - 32px)); height: min(640px, calc(100dvh - 32px)); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
 .st-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
 .st-head h3 { margin: 0; }
 .st-x { width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 24px; line-height: 1; cursor: pointer; }
@@ -767,7 +767,7 @@ html[data-theme="dark"] .st-head, html[data-theme="dark"] .st-nav, html[data-the
 html[data-theme="dark"] .st-item input, html[data-theme="dark"] .st-item select { border-color: rgba(255, 255, 255, 0.18); background-color: rgba(0, 0, 0, 0.35); }
 html[data-theme="dark"] .st-item select option { background: #1b1f33; color: #fff; }
 @media (max-width: 720px) {
-  .settings-box { height: calc(100vh - 32px); }
+  .settings-box { height: calc(100vh - 32px); height: calc(100dvh - 32px); }
   .st-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .st-nav { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 8px; border-right: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
   html[data-theme="dark"] .st-nav { border-bottom-color: rgba(255, 255, 255, 0.12); }

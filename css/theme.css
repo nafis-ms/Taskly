@@ -195,7 +195,7 @@ html:root body .nav{
   html:root body .page:has(> .nav){overflow:clip}
   html:root body .main{padding-top:0;padding-bottom:0;gap:0}
   html:root body .main > section{
-    min-height:100vh;
+    min-height:100vh;min-height:100dvh;
     min-height:100svh;
     box-sizing:border-box;
     scroll-snap-align:start;

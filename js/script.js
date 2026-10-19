@@ -39,8 +39,9 @@
     },
     { rootMargin: "-40% 0px -55% 0px" },
   );
-  ["home", "features", "about", "feedback", "contact"].forEach(function (id) {
-    spy.observe(document.getElementById(id));
+  ["home", "features", "about", "feedback", "contact", "developers"].forEach(function (id) {
+    var sec = document.getElementById(id);
+    if (sec) spy.observe(sec);
   });
   $$("[data-count]").forEach(function (el) {
     var t = +el.dataset.count,
@@ -180,14 +181,8 @@
       "Enter a valid email address.",
       !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email.value.trim()),
     );
-    var pwv = v.pw.value;
-    chk(
-      v.pw,
-      pwv.length < 8
-        ? "Use at least 8 characters."
-        : "Password is too easy. Mix letters and numbers (add a symbol for a hard password).",
-      pwv.length < 8 || TasklyAuth.strength(pwv).level < 2,
-    );
+    var pwProblem = TasklyAuth.passwordProblem(v.pw.value);
+    chk(v.pw, pwProblem, !!pwProblem);
     if (!ok) return;
     var sb = form.querySelector(".submit"),
       ss = $("#sstatus"),
@@ -202,7 +197,6 @@
         chk(v.email, msg, true);
         return;
       }
-      TasklyStore.signup(em, nm);
       $("#dt").textContent = r.needsConfirm ? "Check your email" : "You're in!";
       $("#dm").textContent = r.needsConfirm
         ? "We sent a confirmation link to " + em + ". Click it to verify your email, then log in. (Check spam if you don't see it.)"
@@ -515,11 +509,13 @@
       i.focus();
       return;
     }
-    TasklyAuth.resetPassword(i.value.trim());
-    st.textContent =
-      "If an account exists for " +
-      i.value.trim() +
-      ", we sent a password reset link.";
+    var fe = i.value.trim();
+    st.textContent = "Sending…";
+    TasklyAuth.resetPassword(fe).then(function (r) {
+      st.textContent = r && r.error
+        ? TasklyAuth.friendly(r.error)
+        : "If an account exists for " + fe + ", we sent a password reset link. Check your inbox and spam folder.";
+    });
   };
   lf.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -563,18 +559,13 @@
           rb.className = "link";
           rb.textContent = "Resend confirmation email";
           rb.onclick = function () {
-            TasklyAuth.resend(lem);
-            $("#lstatus").textContent = "Confirmation email sent to " + lem + ".";
+            $("#lstatus").textContent = "Sending…";
+            TasklyAuth.resend(lem).then(function (r) {
+              $("#lstatus").textContent = r && r.error ? TasklyAuth.friendly(r.error) : "Confirmation email sent to " + lem + ".";
+            });
           };
           $("#lstatus").appendChild(rb);
         } else lerr(/password|credentials/i.test(msg) ? v.lp : v.le, msg);
-        return;
-      }
-      if (!TasklyStore.login(lem)) {
-        lstop();
-        TasklyAuth.signOut();
-        lerr(v.le, "This account is suspended. Contact support.");
-        v.le.focus();
         return;
       }
       /* logged in: no pop-up, the button keeps spinning while the dashboard loads */
@@ -626,20 +617,6 @@
       ab.focus();
     }
   });
-  var v = $("#orbVideo"),
-    w = $("#orb");
-  v.addEventListener("playing", function () {
-    w.classList.add("is-playing");
-  });
-  v.addEventListener(
-    "error",
-    function () {
-      w.classList.remove("is-playing");
-    },
-    true,
-  );
-  var p = v.play && v.play();
-  if (p && p.catch) p.catch(function () {});
   /* dark mode */
   var tb = $("#themeBtn"),
     root = document.documentElement,
@@ -721,17 +698,74 @@
   });
   /* fired by auth.js when a verified session exists (Google return, email-link return, password login) */
   window.addEventListener("taskly-auth", function (e) {
-    if (!TasklyStore.login(e.detail.email)) {
-      TasklyAuth.signOut();
-      return;
-    }
     setUser(e.detail.email, e.detail.name);
   });
+  /* signed out in another tab, or the session expired */
+  window.addEventListener("taskly-signedout", applyAuth);
   $("#cta").addEventListener("click", function (e) {
     if (getUser()) return;
     e.preventDefault();
     open("Sign up");
   });
+  /* ---------- reset password: the e-mailed link opens the site with a recovery session ---------- */
+  var rm = $("#rmodal"),
+    rf = $("#rform");
+  if (rm && rf) {
+    var rpw = rf.elements.rp,
+      rbar = $("#rpbar"),
+      rlabel = $("#rplabel"),
+      rstat = $("#rstatus");
+    var rshow = function () {
+      var r = TasklyAuth.strength(rpw.value);
+      rbar.dataset.l = r.level;
+      rbar.classList.toggle("on", r.level > 0);
+      rlabel.textContent = r.label;
+    };
+    rpw.addEventListener("input", rshow);
+    var ropen = function () {
+      if (!rm.hidden) return;
+      rf.reset();
+      rshow();
+      rstat.textContent = "";
+      rstat.className = "ok";
+      $$(".err", rf).forEach(function (e) { e.textContent = ""; });
+      rm.hidden = false;
+      document.body.style.overflow = "hidden";
+      setTimeout(function () { rpw.focus(); }, 30);
+    };
+    var rclose = function () {
+      rm.hidden = true;
+      document.body.style.overflow = "";
+      /* the reset link signed them in: leaving without a new password signs them out again */
+      TasklyAuth.signOut().then(applyAuth);
+    };
+    window.addEventListener("taskly-recovery", ropen);
+    $("#rx").onclick = rclose;
+    rf.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var perr = rpw.closest("label").querySelector(".err"),
+        cerr = rf.elements.rc.closest("label").querySelector(".err"),
+        problem = TasklyAuth.passwordProblem(rpw.value);
+      perr.textContent = problem;
+      cerr.textContent = !problem && rf.elements.rc.value !== rpw.value ? "Passwords do not match." : "";
+      if (problem) { rpw.focus(); return; }
+      if (cerr.textContent) { rf.elements.rc.focus(); return; }
+      var btn = rf.querySelector(".submit");
+      btn.disabled = true;
+      rstat.className = "ok";
+      rstat.textContent = "Saving…";
+      TasklyAuth.setNewPassword(rpw.value).then(function (r) {
+        btn.disabled = false;
+        if (r.error) {
+          rstat.className = "ok bad";
+          rstat.textContent = TasklyAuth.friendly(r.error);
+          return;
+        }
+        rstat.textContent = "Password updated. Opening your dashboard…";
+        setTimeout(function () { location.href = "app.html"; }, 900);
+      });
+    });
+  }
   applyAuth();
 })();
 /* cinematic extras: scroll reveal + pointer parallax */
