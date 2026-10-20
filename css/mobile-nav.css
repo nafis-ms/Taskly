@@ -65,7 +65,7 @@
   html:root body .mmenu[hidden]{display:none}
   .mm-links{display:flex;flex-direction:column;padding-top:4px}
   html:root body .mmenu .mm-links a{
-    display:flex;align-items:center;gap:14px;padding:15px 14px;border-radius:16px;
+    display:flex;align-items:center;gap:14px;padding:15px 18px;border-radius:16px;
     font:600 18px var(--font-head);letter-spacing:-.01em;color:var(--ink);
     position:relative;animation:mm-item .6s cubic-bezier(.16,1,.3,1) both;
     transition:background .25s,transform .3s cubic-bezier(.16,1,.3,1),color .25s;
