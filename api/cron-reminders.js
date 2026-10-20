@@ -23,8 +23,12 @@
  *   GET /api/cron-reminders                    run now
  *   GET /api/cron-reminders?test=you@mail.com  send a sample e-mail to that address (to check the e-mail setup)
  */
-const { BASE, KEY, HEADERS, crypto, configured, json, sb: sbRest } = require("./_lib");
+const crypto = require("crypto");
 
+const BASE = (process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+/* legacy service_role keys are JWTs (eyJ...) and go in Authorization too; new sb_secret_ keys must only be sent as apikey */
+const AUTH = /^eyJ/.test(KEY) ? { Authorization: `Bearer ${KEY}` } : {};
 const SENT = "taskly_reminder_emails";
 const SITE = (process.env.SITE_URL || "https://taskly-36.vercel.app").replace(/\/$/, "");
 const DEFAULT_TZ = process.env.EMAIL_TIMEZONE || "Asia/Dhaka";
@@ -32,6 +36,13 @@ const DEFAULT_TZ = process.env.EMAIL_TIMEZONE || "Asia/Dhaka";
 const UNIT = { minutes: 60000, hours: 3600000, days: 86400000 };
 const GRACE = 10 * 60000; /* still e-mail up to 10 minutes after the deadline if the scheduler was late */
 const MAX_PER_RUN = 40; /* keeps one run well inside the function time limit; the rest goes out on the next tick */
+
+const json = (res, code, body) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.end(JSON.stringify(body));
+};
 
 function authorised(req) {
   const real = process.env.CRON_SECRET || "";
@@ -42,8 +53,15 @@ function authorised(req) {
   return crypto.timingSafeEqual(a, b);
 }
 
-/* same as the shared helper, but without asking Supabase to echo rows back unless a call asks for it */
-const sb = (path, opts = {}) => sbRest(path, { ...opts, headers: { Prefer: "return=minimal", ...(opts.headers || {}) } });
+async function sb(path, opts = {}) {
+  const r = await fetch(`${BASE}/rest/v1/${path}`, {
+    ...opts,
+    headers: { apikey: KEY, ...AUTH, "Content-Type": "application/json", ...(opts.headers || {}) },
+  });
+  const text = await r.text();
+  if (!r.ok) throw new Error(text || `Supabase ${r.status}`);
+  return text ? JSON.parse(text) : [];
+}
 
 /* ---------- e-mail providers ---------- */
 function parseFrom() {
@@ -240,14 +258,14 @@ async function sentKeys(sinceMs) {
   return set;
 }
 async function getUser(id) {
-  const r = await fetch(`${BASE}/auth/v1/admin/users/${encodeURIComponent(id)}`, { headers: HEADERS });
+  const r = await fetch(`${BASE}/auth/v1/admin/users/${encodeURIComponent(id)}`, { headers: { apikey: KEY, ...AUTH } });
   if (r.status >= 500) throw new Error("auth " + r.status);
   if (!r.ok) return null;
   return r.json();
 }
 
 module.exports = async (req, res) => {
-  if (!configured()) return json(res, 500, { error: "Server is not configured" });
+  if (!BASE || !KEY) return json(res, 500, { error: "Server is not configured" });
   if (!authorised(req)) return json(res, 401, { error: "Unauthorized" });
   const problem = providerReady();
   if (problem) return json(res, 500, { error: problem });

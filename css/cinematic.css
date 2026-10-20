@@ -96,4 +96,3 @@ html.cx-theming,html.cx-theming *,html.cx-theming *::before,html.cx-theming *::a
 }
 
 /* the hero light streak was removed; hide it even if an old cached script still creates it */
-.cx-flare{display:none!important}

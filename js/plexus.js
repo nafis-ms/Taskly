@@ -12,7 +12,7 @@
   pg.insertBefore(cv, pg.firstChild);
 
   var W, H, DPR, nodes = [], dust = [], pulses = [], edges = [];
-  var running = false, last = 0, lastY = scrollY, mx = -1e4, my = -1e4, t0 = 0, spawn = 0;
+  var running = false, last = 0, mx = -1e4, my = -1e4, t0 = 0, spawn = 0, rzq = 0;
 
   function sprite(r, stops) {
     var c = document.createElement("canvas");
@@ -38,6 +38,8 @@
     if (nodes.length !== n || cv._w !== W || cv._h !== H) {
       cv._w = W; cv._h = H;
       nodes = [];
+      pulses.length = 0; /* pulses and edges hold node indices: drop them with the old nodes */
+      edges.length = 0;
       /* jittered grid: every cell of the screen gets a node, so no empty spots */
       var cols = Math.ceil(Math.sqrt(n * W / H)), rows = Math.ceil(n / cols), cw = W / cols, ch = H / rows;
       for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
@@ -74,9 +76,7 @@
     last = now;
     var t = now / 1000,
       intro = Math.min((now - t0) / 2800, 1),
-      ease = 1 - Math.pow(1 - intro, 3),
-      ds = 0;
-    lastY = scrollY;
+      ease = 1 - Math.pow(1 - intro, 3);
     ctx.clearRect(0, 0, W, H);
 
     var maxD = W < 700 ? 120 : 175, i, j, n = nodes.length, a, b;
@@ -199,7 +199,7 @@
     var inApp = !!document.getElementById("settingsBtn"),
       dark = root.getAttribute("data-theme") === "dark" && (!inApp || root.getAttribute("data-fx") === "on");
     if (dark && !running) {
-      running = true; last = 0; t0 = 0; lastY = scrollY;
+      running = true; last = 0; t0 = 0;
       requestAnimationFrame(frame);
     } else if (!dark && running) {
       running = false;
@@ -208,8 +208,12 @@
   }
 
   resize();
-  addEventListener("resize", resize);
-  addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") { mx = e.clientX; my = e.clientY; } });
+  /* resizing reallocates the canvas: do it at most once per frame while the window is being dragged */
+  addEventListener("resize", function () {
+    if (rzq) return;
+    rzq = requestAnimationFrame(function () { rzq = 0; resize(); });
+  });
+  addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") { mx = e.clientX; my = e.clientY; } }, { passive: true });
   document.addEventListener("mouseleave", function () { mx = my = -1e4; });
   new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme", "data-fx"] });
   sync();

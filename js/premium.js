@@ -20,15 +20,19 @@
   el("div", "pp-grain").setAttribute("aria-hidden", "true");
   function frame() {
     ticking = false;
-    var max = root.scrollHeight - innerHeight, y = scrollY, vh = innerHeight;
-    bar.style.setProperty("--p", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
-    root.classList.toggle("pp-scrolled", y > 24);
-    secs.forEach(function (s) {
-      if (!desktop.matches) { s.style.removeProperty("--sp"); return; }
+    /* reads first (scroll metrics, section rects), writes after: mixing them forces a layout per write */
+    var max = root.scrollHeight - innerHeight, y = scrollY, vh = innerHeight, on = desktop.matches;
+    var vals = on ? secs.map(function (s) {
       var r = s.getBoundingClientRect(), t = 0;
       if (r.top > 0) t = r.top / vh;
       else if (r.bottom < vh) t = (vh - r.bottom) / vh;
-      s.style.setProperty("--sp", Math.min(1, t).toFixed(3));
+      return Math.min(1, t).toFixed(3);
+    }) : null;
+    bar.style.setProperty("--p", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+    root.classList.toggle("pp-scrolled", y > 24);
+    secs.forEach(function (s, i) {
+      if (!on) { s._sp = null; s.style.removeProperty("--sp"); }
+      else if (s._sp !== vals[i]) { s._sp = vals[i]; s.style.setProperty("--sp", vals[i]); }
     });
   }
   function req() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
@@ -60,11 +64,17 @@
   /* spotlight that tracks the cursor across each card */
   [].forEach.call(d.querySelectorAll(".card"), function (c) {
     el("span", "pp-spot", c).setAttribute("aria-hidden", "true");
+    var raf = 0, px = 0, py = 0;
     c.addEventListener("pointermove", function (e) {
-      var r = c.getBoundingClientRect();
-      c.style.setProperty("--mx", e.clientX - r.left + "px");
-      c.style.setProperty("--my", e.clientY - r.top + "px");
-    });
+      px = e.clientX; py = e.clientY;
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        var r = c.getBoundingClientRect();
+        c.style.setProperty("--mx", px - r.left + "px");
+        c.style.setProperty("--my", py - r.top + "px");
+      });
+    }, { passive: true });
   });
 
   /* section dots */

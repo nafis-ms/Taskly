@@ -33,13 +33,17 @@
   var hero = d.querySelector(".hero");
 
   /* 2. scroll: progress bar (if premium.js is not providing one) + parallax depth variable */
-  var bar = d.querySelector(".pp-bar") ? null : mk("div", "cx-bar", d.body), tick = false;
+  var bar = d.querySelector(".pp-bar") ? null : mk("div", "cx-bar", d.body), tick = false, lastSy = -1;
   if (bar) bar.setAttribute("aria-hidden", "true");
   function frame() {
     tick = false;
     var y = scrollY, max = root.scrollHeight - innerHeight;
     if (bar) bar.style.setProperty("--p", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
-    if (hero) root.style.setProperty("--cx-sy", y < innerHeight * 1.4 ? Math.round(y) : Math.round(innerHeight * 1.4));
+    if (hero) {
+      /* only the hero reads --cx-sy: set it there (not on <html>) so a scroll frame does not restyle the whole page, and skip repeats */
+      var sy = y < innerHeight * 1.4 ? Math.round(y) : Math.round(innerHeight * 1.4);
+      if (sy !== lastSy) { lastSy = sy; hero.style.setProperty("--cx-sy", sy); }
+    }
   }
   addEventListener("scroll", function () { if (!tick) { tick = true; requestAnimationFrame(frame); } }, { passive: true });
   frame();
@@ -64,17 +68,22 @@
   /* 5. 3D tilt on the landing-page content cards + magnetic call-to-action buttons */
   if (fine) {
     $$("article.card").forEach(function (c) {
-      var raf = 0;
+      var raf = 0, cx = 0, cy = 0;
       c.addEventListener("pointerenter", function () { c.classList.add("cx-live"); });
       c.addEventListener("pointermove", function (e) {
-        var r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
-        cancelAnimationFrame(raf);
+        cx = e.clientX; cy = e.clientY;
+        if (raf) return;
         raf = requestAnimationFrame(function () {
+          raf = 0;
+          var r = c.getBoundingClientRect(), px = (cx - r.left) / r.width - 0.5, py = (cy - r.top) / r.height - 0.5;
           c.style.setProperty("--ry", (px * 9).toFixed(2) + "deg");
           c.style.setProperty("--rx", (-py * 9).toFixed(2) + "deg");
         });
+      }, { passive: true });
+      c.addEventListener("pointerleave", function () {
+        cancelAnimationFrame(raf); raf = 0;
+        c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg");
       });
-      c.addEventListener("pointerleave", function () { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); });
     });
     $$(".cta,.cta2").forEach(function (b) {
       b.addEventListener("pointermove", function (e) {

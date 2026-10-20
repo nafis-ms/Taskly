@@ -79,7 +79,7 @@
     if (e.pointerType !== "mouse") return;
     mx = e.clientX / innerWidth - 0.5;
     my = e.clientY / innerHeight - 0.5;
-  });
+  }, { passive: true });
   addEventListener("resize", function () { W = innerWidth; H = innerHeight; });
   new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme", "data-fx"] });
   sync();

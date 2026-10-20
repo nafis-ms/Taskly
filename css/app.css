@@ -385,9 +385,6 @@
   font-size: 14px;
   border-radius: 10px;
 }
-.daybar {
-  margin-bottom: 14px;
-}
 
 /* Lists */
 .list {
@@ -410,10 +407,6 @@
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(0, 0, 0, 0.08);
   transition: opacity 0.25s, transform 0.25s;
-}
-.item.leaving {
-  opacity: 0;
-  transform: translateX(24px);
 }
 .item .body {
   flex: 1;
@@ -469,9 +462,6 @@
 .chip.late {
   background: rgba(217, 45, 32, 0.14);
   color: #d92d20;
-}
-.item.warn {
-  border-color: rgba(217, 45, 32, 0.45);
 }
 .timeline .when {
   flex: none;
@@ -580,9 +570,6 @@ html[data-theme="dark"] .panel {
 html[data-theme="dark"] .item {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);
-}
-html[data-theme="dark"] .item.warn {
-  border-color: rgba(248, 113, 113, 0.6);
 }
 html[data-theme="dark"] .panel input,
 html[data-theme="dark"] .panel select {
@@ -713,7 +700,6 @@ html[data-theme="dark"] .md.has { background: rgba(96, 165, 250, 0.18); }
 .rem-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 16px; align-items: start; }
 .rem-grid .mcard { margin-top: 0; position: sticky; top: 16px; }
 .tcard .notice { margin-top: 12px; }
-.tcard #remList { margin-top: 0; }
 @media (max-width: 720px) { .rem-grid { grid-template-columns: minmax(0, 1fr); } .rem-grid .mcard { position: static; } }
 
 /* month card: status label vs Done button */
@@ -738,7 +724,7 @@ html[data-theme="dark"] .mdel { color: #f87171; border-color: rgba(248, 113, 113
 @media (max-width: 720px) { .hist-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* Settings dialog (VS Code style: category list + settings list) */
-.settings-box { width: min(900px, 100%); height: min(640px, calc(100vh - 32px)); height: min(640px, calc(100dvh - 32px)); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.settings-box { width: min(900px, 100%); height: min(640px, calc(100vh - 32px)); padding: 0; display: flex; flex-direction: column; overflow: hidden; }
 .st-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
 .st-head h3 { margin: 0; }
 .st-x { width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 24px; line-height: 1; cursor: pointer; }
@@ -767,7 +753,7 @@ html[data-theme="dark"] .st-head, html[data-theme="dark"] .st-nav, html[data-the
 html[data-theme="dark"] .st-item input, html[data-theme="dark"] .st-item select { border-color: rgba(255, 255, 255, 0.18); background-color: rgba(0, 0, 0, 0.35); }
 html[data-theme="dark"] .st-item select option { background: #1b1f33; color: #fff; }
 @media (max-width: 720px) {
-  .settings-box { height: calc(100vh - 32px); height: calc(100dvh - 32px); }
+  .settings-box { height: calc(100vh - 32px); }
   .st-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .st-nav { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 8px; border-right: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
   html[data-theme="dark"] .st-nav { border-bottom-color: rgba(255, 255, 255, 0.12); }

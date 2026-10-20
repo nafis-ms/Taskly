@@ -43,110 +43,63 @@
       if (t.done == null) t.done = false;
     });
   }
-  var pushT = 0,
-    dirty = false,
-    lastTok = null,
-    warned = false;
-  try { dirty = localStorage.getItem("taskly:dirty") === "1"; } catch (e) {}
-  function body() {
-    return JSON.stringify({ data: S, ts: +localStorage.getItem("taskly:ts") || Date.now() });
+  /* ---------- account sync ----------
+     The account on the server is the source of truth; localStorage is a cache.
+     Nothing is uploaded until the server copy has been read once (pulled), so a freshly signed-in,
+     still-empty app can never overwrite the saved data. */
+  var pushT = 0, pulled = false, dirty = false, tok = "", syncTries = 0;
+  function blank() {
+    return !S.todos.length && !S.history.length && !S.reminders.length && !S.remHistory.length &&
+      !Object.keys(S.schedule).length && !Object.keys(S.weekly).length && !Object.keys(S.checks).length;
   }
-  /* send everything to the account; resolves true only when the server confirmed it */
-  function send() {
-    return TasklyAuth.token()
-      .then(function (t) {
-        if (!t) return false;
-        lastTok = t;
-        return fetch("/api/data", {
-          method: "PUT",
-          headers: { Authorization: "Bearer " + t, "Content-Type": "application/json" },
-          body: body(),
-        }).then(function (r) {
-          if (!r.ok) {
-            return r.json().catch(function () { return {}; }).then(function (d) {
-              console.error("Taskly: online save failed", r.status, d);
-              var e = new Error("save " + r.status);
-              e.status = r.status;
-              throw e;
-            });
-          }
-          dirty = false;
-          warned = false;
-          try { localStorage.removeItem("taskly:dirty"); } catch (e) {}
-          return true;
-        });
-      })
-      .catch(function (e) {
-        if (!warned) {
-          warned = true;
-          toast("Couldn't save to your account" + (e && e.status ? " (error " + e.status + ")" : "") + ". Your changes are kept on this device and will be retried.");
-        }
-        clearTimeout(pushT);
-        pushT = setTimeout(send, 15000);
-        return false;
-      });
+  function send(t, keep) {
+    return fetch("/api/data", { method: "PUT", keepalive: !!keep, headers: { Authorization: "Bearer " + t, "Content-Type": "application/json" },
+      body: JSON.stringify({ data: S, ts: +localStorage.getItem("taskly:ts") || Date.now() }) })
+      .then(function (r) { if (r.ok) dirty = false; return r.ok; }, function () { return false; });
+  }
+  /* upload now; resolves true when nothing is left unsaved */
+  function flush() {
+    clearTimeout(pushT);
+    if (!dirty) return Promise.resolve(true);
+    if (!pulled) return Promise.resolve(false);
+    return TasklyAuth.token().then(function (t) { if (!t) return false; tok = t; return send(t); }, function () { return false; });
   }
   function push() {
-    dirty = true;
-    try { localStorage.setItem("taskly:dirty", "1"); } catch (e) {}
     clearTimeout(pushT);
-    pushT = setTimeout(send, 1200);
-  }
-  /* save right now (used before logging out); gives up after 5s */
-  function flushNow() {
-    if (!dirty) return Promise.resolve(true);
-    clearTimeout(pushT);
-    return Promise.race([send(), new Promise(function (ok) { setTimeout(function () { ok(false); }, 5000); })]);
-  }
-  /* closing the tab inside the 1.2s debounce used to drop the last edits */
-  function beacon() {
-    if (!dirty || !lastTok) return;
-    try {
-      fetch("/api/data", {
-        method: "PUT",
-        keepalive: true,
-        headers: { Authorization: "Bearer " + lastTok, "Content-Type": "application/json" },
-        body: body(),
-      });
-    } catch (e) {}
-  }
-  window.addEventListener("pagehide", beacon);
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden") beacon();
-  });
-  /* history and old ticks only ever grow: keep them bounded so the account data stays small */
-  function trim() {
-    if (S.history.length > 600) S.history = S.history.slice(-600);
-    if (S.remHistory.length > 300) S.remHistory = S.remHistory.slice(-300);
-    var cut = ymd(new Date(Date.now() - 120 * 86400000));
-    Object.keys(S.checks).forEach(function (k) { if (k < cut) delete S.checks[k]; });
+    pushT = setTimeout(flush, 1200);
   }
   function save() {
-    trim();
     try {
       localStorage.setItem(KEY, JSON.stringify(S));
+      /* an automatic save of an empty, never-synced state must not look newer than the account's data */
+      if (!pulled && blank()) return;
       localStorage.setItem("taskly:ts", String(Date.now()));
     } catch (e) {}
+    dirty = true;
     push();
   }
-  /* the account on the server is the source of truth; localStorage is just a cache */
   function sync() {
     TasklyAuth.token().then(function (t) {
       if (!t) return;
-      lastTok = t;
+      tok = t;
       fetch("/api/data", { headers: { Authorization: "Bearer " + t }, cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (d) {
-          if (!d) return;
+          if (!d) throw 0;
+          pulled = true;
           var local = +localStorage.getItem("taskly:ts") || 0;
           if (d.data && d.ts > local) {
+            dirty = false;
             localStorage.setItem(KEY, JSON.stringify(d.data));
             localStorage.setItem("taskly:ts", String(d.ts));
             location.reload();
-          } else if (local > d.ts) push();
-        }).catch(function () {});
-    });
+          } else if (local > d.ts) { dirty = true; push(); }
+        }).catch(function () { if (++syncTries < 6) setTimeout(sync, 6000); });
+    }, function () {});
   }
+  addEventListener("online", function () { if (!pulled) sync(); });
+  /* leaving the page: send anything still waiting for the 1.2 s debounce */
+  addEventListener("pagehide", function () { if (dirty && pulled && tok) { clearTimeout(pushT); send(tok, true); } });
   setTimeout(sync, 300);
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -218,22 +171,19 @@
 
 
   $("#logoutBtn").addEventListener("click", function () {
-    var btn = this;
-    btn.disabled = true;
-    /* make sure the latest changes reached the account BEFORE the local copy is wiped */
-    flushNow().then(function (ok) {
-      if (!ok && !confirm("Your latest changes could not be saved to your account. Log out anyway? Unsaved changes will be lost.")) {
-        btn.disabled = false;
-        return;
-      }
+    var go = function () {
+      location.href = "index.html";
+    };
+    var out = function () {
       try {
         localStorage.removeItem("taskly:user");
       } catch (e) {}
-      var go = function () {
-        location.href = "index.html";
-      };
       if (window.TasklyAuth) TasklyAuth.signOut().then(go, go);
       else go();
+    };
+    /* signing out clears the local copy, so make sure the account has the latest changes first */
+    Promise.race([flush(), new Promise(function (r) { setTimeout(function () { r(false); }, 4000); })]).then(function (saved) {
+      if (saved || confirm("Your latest changes could not be saved to your account yet. Log out anyway? Unsaved changes will be lost.")) out();
     });
   });
 
@@ -1223,6 +1173,24 @@
   /* ---------- settings ---------- */
   (function () {
     var EM = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    function pwHash(pw) {
+    var s = "taskly|" + pw, h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 2654435761);
+      h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
+  }
+  function pwMap() {
+    try {
+      return JSON.parse(localStorage.getItem("taskly:pw") || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  }
     function readUser() {
       var raw = null;
       try {
@@ -1312,53 +1280,31 @@
     });
     $("#stClear").addEventListener("click", function () {
       if (!confirm("Delete all tasks, reminders, schedule and history? This cannot be undone.")) return;
-      S.todos = [];
-      S.history = [];
-      S.reminders = [];
-      S.remHistory = [];
-      S.schedule = {};
-      S.weekly = {};
-      S.checks = {};
-      S.day = todayStr();
-      save();
-      /* wait until the empty copy is on the account too, otherwise deleted reminders would still be e-mailed */
-      flushNow().then(function () {
-        location.reload();
-      });
-    });
-    /* Google accounts have no password and their e-mail is managed by Google */
-    var provider = "";
-    function lockAccount() {
-      var social = provider && provider !== "email";
-      [emIn, curIn, newIn, confIn].forEach(function (i) {
-        i.disabled = social;
-        if (social) i.title = "Managed by your " + provider + " account";
-      });
-    }
-    TasklyAuth.provider().then(function (p) {
-      provider = p;
-      lockAccount();
+      try {
+        localStorage.removeItem(KEY);
+      } catch (e) {}
+      location.reload();
     });
     $("#stSave").addEventListener("click", function () {
       var u = readUser(),
         oldEmail = String(u.email || ""),
+        oldKey = oldEmail.toLowerCase(),
         email = emIn.value.trim(),
+        newKey = email.toLowerCase(),
         cur = curIn.value,
         np = newIn.value,
         cf = confIn.value,
-        social = provider && provider !== "email",
-        wantPw = !social && !!(np || cf || cur),
-        wantEmail = !social && email.toLowerCase() !== oldEmail.toLowerCase(),
-        n = nameIn.value.trim(),
+        pws = pwMap(),
+        wantPw = !!(np || cf),
         first = null;
       function check(input, msg) {
         setErr(input, msg);
         if (msg && !first) first = input;
       }
-      check(emIn, social || EM.test(email) ? "" : "Enter a valid email address.");
+      check(emIn, EM.test(email) ? "" : "Enter a valid email address.");
       if (wantPw) {
-        check(curIn, cur ? "" : "Enter your current password.");
-        check(newIn, TasklyAuth.passwordProblem(np));
+        check(curIn, pws[oldKey] && pwHash(cur) !== pws[oldKey] ? "Current password is incorrect." : "");
+        check(newIn, np.length < 8 ? "Use at least 8 characters." : "");
         check(confIn, cf !== np ? "Passwords do not match." : "");
       } else {
         [curIn, newIn, confIn].forEach(function (i) {
@@ -1371,7 +1317,35 @@
         return;
       }
 
-      /* appearance applies right away (it lives on this device) */
+      /* account + security */
+      var n = nameIn.value.trim();
+      var map = {};
+      try {
+        map = JSON.parse(localStorage.getItem("taskly:names") || "{}") || {};
+      } catch (e) {}
+      if (newKey !== oldKey) {
+        if (oldKey in map) {
+          map[newKey] = map[oldKey];
+          delete map[oldKey];
+        }
+        if (oldKey in pws) {
+          pws[newKey] = pws[oldKey];
+          delete pws[oldKey];
+        }
+      }
+      if (n) map[newKey] = n;
+      else delete map[newKey];
+      if (wantPw) pws[newKey] = pwHash(np);
+      try {
+        localStorage.setItem("taskly:user", JSON.stringify({ email: email, name: n }));
+        localStorage.setItem("taskly:names", JSON.stringify(map));
+        localStorage.setItem("taskly:pw", JSON.stringify(pws));
+      } catch (e) {}
+      uname = n || email.split("@")[0];
+      niceName = uname.charAt(0).toUpperCase() + uname.slice(1);
+      $("#uname").textContent = "Hi, " + uname;
+
+      /* appearance */
       var wantDark = themeSel.value === "dark";
       if (wantDark !== (root.getAttribute("data-theme") === "dark")) theme(wantDark, true);
       var wantFx = fxSel.value === "on";
@@ -1387,55 +1361,11 @@
           localStorage.setItem("taskly:clock24", clk24 ? "1" : "0");
         } catch (e) {}
       }
-
-      /* account changes go to the server; the dialog closes only when they worked */
-      var sv = $("#stSave"),
-        notes = [];
-      sv.disabled = true;
-      var steps = Promise.resolve();
-      if (n && n !== (u.name || uname)) {
-        steps = steps.then(function () {
-          return TasklyAuth.updateName(n).then(function (r) {
-            if (r.error) throw { input: nameIn, msg: TasklyAuth.friendly(r.error) };
-            uname = n;
-            niceName = uname.charAt(0).toUpperCase() + uname.slice(1);
-            $("#uname").textContent = "Hi, " + uname;
-          });
-        });
-      }
-      if (wantPw) {
-        steps = steps.then(function () {
-          return TasklyAuth.changePassword(oldEmail, cur, np).then(function (r) {
-            if (r.error) throw { input: /current/i.test(r.error.message) ? curIn : newIn, msg: TasklyAuth.friendly(r.error) };
-            notes.push("Password updated.");
-          });
-        });
-      }
-      if (wantEmail) {
-        steps = steps.then(function () {
-          return TasklyAuth.changeEmail(email).then(function (r) {
-            if (r.error) throw { input: emIn, msg: TasklyAuth.friendly(r.error) };
-            notes.push("Check " + email + " to confirm the new address. Until then you keep logging in with " + oldEmail + ".");
-          });
-        });
-      }
-      steps
-        .then(function () {
-          sv.disabled = false;
-          tick();
-          renderDash();
-          m.hidden = true;
-          opener.focus();
-          toast(["Settings saved."].concat(notes).join(" "));
-        })
-        .catch(function (e) {
-          sv.disabled = false;
-          if (e && e.input) {
-            setErr(e.input, e.msg);
-            showCat(e.input.closest(".st-sec").dataset.cat);
-            e.input.focus();
-          } else toast("Could not save your account changes. Check your connection and try again.");
-        });
+      tick();
+      renderDash();
+      m.hidden = true;
+      opener.focus();
+      toast(wantPw ? "Settings saved. Password updated." : "Settings saved.");
     });
   })();
 
@@ -1498,9 +1428,6 @@
       items = dayItems(ds),
       doneN = items.filter(function (b) {
         return isDone(ds, b.id);
-      }).length,
-      leftN = items.filter(function (b) {
-        return !isDone(ds, b.id) && mins(b.end) > nowM;
       }).length,
       sortedRem = S.reminders.slice().sort(function (a, b) {
         return new Date(a.due) - new Date(b.due);

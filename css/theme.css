@@ -59,13 +59,9 @@ html:root body{
 /* 3D scene (replaces the orb video; still draggable via #orbGrab) */
 .orb-wrap{position:relative!important;width:min(580px,92vw)!important;aspect-ratio:1!important;height:auto!important;margin-inline:auto;animation:sceneIn 1.6s .9s cubic-bezier(.2,.8,.2,1) both}
 .orb-wrap .orb-fallback,.orb-wrap .orb-stage{display:none!important}
-.scene{position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 30px 40px rgba(20,10,70,.35))}
-.sh{transform-box:fill-box;transform-origin:center;translate:calc(var(--mx,0)*var(--d)*1px) calc(var(--my,0)*var(--d)*1px);animation:float var(--t,7s) ease-in-out infinite alternate}
-@keyframes float{from{transform:translateY(-10px) rotate(-1.5deg)}to{transform:translateY(14px) rotate(2deg)}}
 @keyframes sceneIn{from{opacity:0;transform:scale(.7) rotate(-8deg);filter:blur(14px)}to{opacity:1;transform:none;filter:none}}
 .orb-grab{position:absolute;inset:8%;border-radius:50%;cursor:grab;touch-action:none}
 .orb-wrap.dragging .orb-grab{cursor:grabbing}
-.shadow-e{fill:#000;opacity:.25;filter:blur(14px)}
 
 /* sections + cards */
 html:root body{
@@ -93,7 +89,7 @@ html:root body{
  .panel h2{font:700 30px/1.1 var(--font-head);color:var(--ink)}
  .item{background:var(--surf2);border:1px solid var(--line);border-radius:18px;transition:transform .25s,opacity .25s,border-color .2s}
  .item:hover{transform:translateX(4px);border-color:var(--blue)}
- .item.warn{border-color:#ff6b81}
+
  .check{border-color:var(--blue)}.check:hover{background:var(--blue)}
  .del{background:var(--surf);color:var(--ink)}
  .chip{background:color-mix(in srgb,var(--blue) 18%,transparent);color:var(--blue)}
@@ -108,7 +104,7 @@ html:root body{
 @media (min-width:769px){html:root body{.tabs{border-radius:28px}.tabs .ic{background:var(--surf2);border-color:var(--line);color:var(--ink)}.tabs .dk[aria-selected="true"] .ic{background:var(--grad);color:#fff;box-shadow:0 8px 24px color-mix(in srgb,var(--blue) 55%,transparent)}.tabs .dk[aria-selected="true"]::before{background:var(--blue)}}}
 @media (max-width:768px){html:root body .tabs{background:var(--surf2)}}
 @media (max-width:860px){html:root body .hero{grid-template-columns:1fr;padding-top:40px;text-align:left}.orb-wrap{width:min(440px,88vw)!important}}
-@media (prefers-reduced-motion:reduce){.sh,.glow i,.page::before,.hero .copy>*,.orb-wrap{animation:none!important}.rv{opacity:1;transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){.glow i,.page::before,.hero .copy>*,.orb-wrap{animation:none!important}.rv{opacity:1;transform:none;filter:none}}
 
 /* ===== Bokeh bubbles + landing re-layout ===== */
 .bokeh{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
@@ -136,7 +132,7 @@ html:root body{
 
 /* remove grid + 3D boxes; empty orb slot keeps the hero balance */
 .hero::before{content:none!important;display:none!important}
-.orb-wrap .scene,.orb-grab{display:none!important}
+.orb-grab{display:none!important}
 .orb-wrap{pointer-events:none;animation:none!important}
 
 /* hero content on the left */
@@ -195,7 +191,7 @@ html:root body .nav{
   html:root body .page:has(> .nav){overflow:clip}
   html:root body .main{padding-top:0;padding-bottom:0;gap:0}
   html:root body .main > section{
-    min-height:100vh;min-height:100dvh;
+    min-height:100vh;
     min-height:100svh;
     box-sizing:border-box;
     scroll-snap-align:start;
@@ -267,7 +263,6 @@ html:root body .fbview{gap:14px;padding:24px 28px;min-width:0}
 .fb-text{margin:0;font-size:17px;line-height:1.65;color:var(--ink);overflow-wrap:anywhere}
 .fb-slide.fb-empty .fb-text{color:var(--muted)}
 .fb-by{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:14px;font-weight:600;color:var(--ink)}
-.fb-tag{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--acc2) 28%,transparent);color:var(--ink)}
 .fb-more{align-self:flex-start;padding:0;border:0;background:none;color:var(--blue);font:500 14px var(--font-body);text-decoration:underline;cursor:pointer}
 .fb-nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .fb-nav[hidden]{display:none}

@@ -380,7 +380,7 @@
   /* ---------- the contact form entry point ---------- */
   function start(d) {
     unlock();
-    var ui = build();
+    build();
     var p = addPending(d.text, d);
     open();
     post(p);
