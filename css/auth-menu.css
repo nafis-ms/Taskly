@@ -1,0 +1,69 @@
+/* Premium account menu: Log in / Sign up buttons. Load last (after feedback.css). */
+
+/* trigger: gradient-ringed avatar button */
+html:root body #acctBtn{
+  position:relative;width:42px;height:42px;border-radius:14px;border:0;
+  background:linear-gradient(var(--surf2),var(--surf2)) padding-box,linear-gradient(var(--bg),var(--bg)) padding-box,var(--grad) border-box!important;
+  border:1.5px solid transparent;
+  box-shadow:0 8px 20px -10px color-mix(in srgb,var(--blue) 80%,transparent);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
+}
+html:root body #acctBtn svg{stroke:var(--blue);transition:transform .3s}
+html:root body #acctBtn:hover,html:root body .acct.open #acctBtn{transform:translateY(-1px) scale(1.06);box-shadow:0 12px 26px -10px color-mix(in srgb,var(--blue) 95%,transparent)}
+html:root body .acct.open #acctBtn svg{transform:scale(1.08)}
+
+/* panel */
+html:root body .acct-menu{
+  width:272px;padding:16px;gap:10px;border-radius:22px;overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--blue) 24%,var(--line));
+  background:
+    radial-gradient(220px 120px at 100% 0%,color-mix(in srgb,var(--acc2) 22%,transparent),transparent 70%),
+    radial-gradient(220px 140px at 0% 0%,color-mix(in srgb,var(--blue) 18%,transparent),transparent 70%),
+    var(--surf2);
+  box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.05) inset;
+  transform-origin:top right;transform:translateY(-10px) scale(.96);
+}
+html:root body .acct.open .acct-menu{transform:none}
+html:root body .acct-menu::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--grad)}
+.am-head{display:flex;flex-direction:column;gap:4px;padding:4px 2px 6px}
+.am-kicker{font:700 16px var(--font-head);color:var(--ink);letter-spacing:-.01em}
+.am-sub{font-size:12.5px;line-height:1.5;color:var(--muted)}
+.am-head[hidden]{display:none}
+
+/* buttons (reset the old nth-child styling) */
+html:root body .acct-menu a.am-btn{
+  position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;
+  padding:13px 16px;border-radius:14px;font:600 14.5px var(--font-body);letter-spacing:.01em;text-align:left;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,background .25s,border-color .25s,color .25s,opacity .25s;
+}
+html:root body .acct-menu a.am-btn[hidden]{display:none}
+.am-btn svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.am-btn span{flex:1}
+html:root body .acct-menu a.am-login{
+  color:var(--ink);background:color-mix(in srgb,var(--surf2) 85%,transparent);
+  border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));
+}
+html:root body .acct-menu a.am-login:hover{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent);transform:translateY(-1px)}
+html:root body .acct-menu a.am-signup{
+  color:#fff;border:0;background:var(--grad);
+  box-shadow:0 14px 28px -12px color-mix(in srgb,var(--blue) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.4);
+}
+html:root body .acct-menu a.am-signup::after{
+  content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);
+  transform:translateX(-130%) skewX(-18deg);pointer-events:none;
+}
+html:root body .acct-menu a.am-signup:hover{background:var(--grad);transform:translateY(-2px);box-shadow:0 20px 34px -12px color-mix(in srgb,var(--blue) 95%,transparent),inset 0 1px 0 rgba(255,255,255,.45)}
+html:root body .acct-menu a.am-signup:hover::after{transform:translateX(230%) skewX(-18deg);transition:transform .9s cubic-bezier(.16,1,.3,1)}
+.am-arrow{width:16px!important;height:16px!important;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.am-signup:hover .am-arrow{transform:translateX(4px)}
+html:root body .acct-menu a.am-logout{color:var(--ink);border:1px solid var(--line);background:color-mix(in srgb,var(--surf2) 85%,transparent)}
+html:root body .acct-menu a.am-logout:hover{border-color:#e5484d;color:#e5484d;background:rgba(229,72,77,.08)}
+html:root body .acct-menu a.am-btn:active{transform:scale(.975)}
+html:root body .acct-menu a.am-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* stagger the entrance */
+html:root body .acct.open .acct-menu .am-head{animation:am-in .5s .04s cubic-bezier(.16,1,.3,1) backwards}
+html:root body .acct.open .acct-menu .am-login{transition-delay:0s,0s,0s,0s,0s,.08s}
+@keyframes am-in{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.am-signup::after{display:none}}
+@media (max-width:420px){html:root body .acct-menu{width:min(272px,calc(100vw - 32px))}}
