@@ -900,7 +900,10 @@
     card = $("fbview"),
     track = $("fbtrack"),
     dots = $("fbdots"),
-    nav = $("fbnav");
+    nav = $("fbnav"),
+    prog = $("fbprog"),
+    curEl = $("fbcur"),
+    totEl = $("fbtot");
   var items = [], timer = null, hold = false, visible = false, holdT = 0, raf = 0;
 
   /* ---------- slider (all user text goes in with textContent, never innerHTML) ---------- */
@@ -923,7 +926,14 @@
     f.className = "fb-slide";
     q.className = "fb-text";
     c.className = "fb-by";
-    f.appendChild(stars(it.rating));
+    var top = document.createElement("div");
+    top.className = "fb-top";
+    top.appendChild(stars(it.rating));
+    var num = document.createElement("span");
+    num.className = "fb-num";
+    num.textContent = (Math.min(5, Math.max(1, parseInt(it.rating, 10) || 5))).toFixed(1);
+    top.appendChild(num);
+    f.appendChild(top);
     f.appendChild(q);
     if (text.length > SHORT) {
       var open = false, more = document.createElement("button");
@@ -938,9 +948,23 @@
       paint();
       f.appendChild(more);
     } else q.textContent = text;
+    var nm = String(it.name || "").trim() || "Anonymous";
+    var av = document.createElement("span");
+    av.className = "fb-av";
+    av.setAttribute("aria-hidden", "true");
+    av.textContent = nm === "Anonymous" ? "?" : nm.charAt(0).toUpperCase();
+    av.style.setProperty("--h", (nm.charCodeAt(0) * 37) % 60 + 240);
     var who = document.createElement("span");
-    who.textContent = it.name || "Anonymous";
-    c.appendChild(who);
+    who.className = "fb-name";
+    who.textContent = nm;
+    var vt = document.createElement("small");
+    vt.textContent = "Taskly user";
+    var wb = document.createElement("span");
+    wb.className = "fb-who";
+    wb.appendChild(who);
+    wb.appendChild(vt);
+    c.appendChild(av);
+    c.appendChild(wb);
     f.appendChild(c);
     return f;
   }
@@ -957,6 +981,28 @@
   function mark() {
     var i = index();
     [].forEach.call(dots.children, function (d, k) { d.setAttribute("aria-current", k === i); });
+    [].forEach.call(track.children, function (s, k) { s.classList.toggle("is-active", k === i); });
+    var n = count();
+    if (curEl) { curEl.textContent = pad(Math.min(i + 1, n)); totEl.textContent = pad(n); }
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function bar() {
+    if (!prog) return;
+    prog.classList.remove("run");
+    void prog.offsetWidth;
+    if (timer) prog.classList.add("run");
+  }
+  function summary() {
+    var sum = $("fbsum");
+    if (!items.length) { sum.hidden = true; return; }
+    var t = 0;
+    items.forEach(function (x) { t += Math.min(5, Math.max(1, parseInt(x.rating, 10) || 5)); });
+    var avg = t / items.length;
+    $("fbavg").textContent = avg.toFixed(1);
+    $("fbtotal").textContent = items.length + (items.length === 1 ? " review" : " reviews");
+    var st = stars(Math.round(avg));
+    $("fbavgst").innerHTML = st.innerHTML;
+    sum.hidden = false;
   }
   function go(i) {
     var n = count();
@@ -971,6 +1017,9 @@
     if (!list.length) {
       track.appendChild(note(emptyMsg || "No feedback yet. Yours could be the first."));
       nav.hidden = true;
+      prog.hidden = true;
+      summary();
+      mark();
       return;
     }
     list.forEach(function (it, i) {
@@ -982,15 +1031,19 @@
       dots.appendChild(d);
     });
     nav.hidden = list.length < 2;
+    prog.hidden = list.length < 2;
     track.scrollLeft = 0;
+    summary();
     mark();
   }
   function play() {
     clearInterval(timer);
     timer = null;
+    if (prog) prog.classList.remove("run");
     var expanded = track.querySelector('.fb-more[aria-expanded="true"]');
     if (reduce || count() < 2 || hold || expanded || !visible || document.hidden) return;
-    timer = setInterval(function () { go(index() + 1); }, AUTOPLAY);
+    timer = setInterval(function () { go(index() + 1); bar(); }, AUTOPLAY);
+    bar();
   }
   function pause(ms) {
     hold = true;
@@ -1011,6 +1064,35 @@
   card.addEventListener("focusout", resume);
   card.addEventListener("touchstart", function () { pause(10000); }, { passive: true });
   document.addEventListener("visibilitychange", play);
+  card.addEventListener("pointermove", function (e) {
+    var r = card.getBoundingClientRect();
+    card.style.setProperty("--mx", e.clientX - r.left + "px");
+    card.style.setProperty("--my", e.clientY - r.top + "px");
+  });
+  /* desktop: drag the slider with the mouse (touch already swipes natively) */
+  (function () {
+    var down = false, sx = 0, sl = 0, moved = false;
+    track.addEventListener("pointerdown", function (e) {
+      if (e.pointerType !== "mouse" || e.button !== 0 || e.target.closest("button")) return;
+      down = true; moved = false; sx = e.clientX; sl = track.scrollLeft;
+    });
+    window.addEventListener("pointermove", function (e) {
+      if (!down) return;
+      var dx = e.clientX - sx;
+      if (Math.abs(dx) > 4 && !moved) { moved = true; track.classList.add("drag"); }
+      if (moved) track.scrollLeft = sl - dx;
+    });
+    window.addEventListener("pointerup", function (e) {
+      if (!down) return;
+      down = false;
+      track.classList.remove("drag");
+      if (moved) go(Math.round(track.scrollLeft / (track.clientWidth || 1)));
+    });
+  })();
+  var CAP = ["", "We'll do better", "Could be better", "Pretty good", "Really good", "Absolutely love it"];
+  [].forEach.call(form.querySelectorAll('input[name="rating"]'), function (r) {
+    r.addEventListener("change", function () { $("fbcap").textContent = CAP[+r.value] || ""; $("fbcap").className = "rate-cap on"; });
+  });
   if ("IntersectionObserver" in window)
     new IntersectionObserver(function (es) {
       visible = es[0].isIntersecting;
@@ -1091,6 +1173,8 @@
       form.reset();
       who();
       counter.textContent = "0";
+      $("fbcap").textContent = "Tap a star to rate";
+      $("fbcap").className = "rate-cap";
       counter.parentNode.classList.remove("max");
       form.style.minHeight = form.offsetHeight + "px";
       form.classList.add("done");
