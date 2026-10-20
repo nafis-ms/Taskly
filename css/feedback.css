@@ -1,0 +1,145 @@
+/* Taskly premium feedback section: cinematic testimonial stage + glass form.
+   Load after theme.css / premium.css / cinematic.css. Uses the existing theme variables, so every theme works. */
+
+/* ---------- shared: the two cards ---------- */
+html:root body #feedback .fb{gap:22px;perspective:1400px}
+html:root body #feedback .fbform,
+html:root body #feedback .fbview{
+  position:relative;overflow:hidden;isolation:isolate;
+  border-radius:28px;
+  border:1px solid color-mix(in srgb,var(--blue) 22%,var(--line));
+  background:
+    linear-gradient(155deg,color-mix(in srgb,var(--surf2) 90%,transparent),var(--surf) 60%),
+    var(--surf);
+  box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.04) inset,inset 0 1px 0 rgba(255,255,255,.4);
+}
+/* thin gradient rim that lights up on hover */
+html:root body #feedback .fbform::before,
+html:root body #feedback .fbview::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;z-index:3;pointer-events:none;
+  background:linear-gradient(140deg,color-mix(in srgb,var(--blue) 70%,transparent),transparent 38%,transparent 62%,color-mix(in srgb,var(--acc2) 65%,transparent));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  opacity:.35;transition:opacity .5s;
+}
+html:root body #feedback .fbform:hover::before,
+html:root body #feedback .fbview:hover::before{opacity:.95}
+
+/* ---------- form: stars ---------- */
+.fbform .rate-in{gap:4px}
+.fbform .rate-in svg{width:34px;height:34px;stroke-width:1.4;filter:drop-shadow(0 0 0 transparent);transition:fill .2s,transform .35s cubic-bezier(.34,1.56,.64,1),filter .3s}
+.fbform .rate-in input:checked ~ label svg,
+.fbform .rate-in label:hover svg,
+.fbform .rate-in label:hover ~ label svg{fill:var(--star);filter:drop-shadow(0 0 9px color-mix(in srgb,var(--star) 75%,transparent))}
+.fbform .rate-in label:hover svg{transform:scale(1.22) rotate(-6deg)}
+.rate-cap{display:block;margin-top:6px;font-size:13px;letter-spacing:.02em;color:var(--muted);transition:color .3s,transform .3s}
+.rate-cap.on{color:var(--blue);font-weight:600;animation:fbv-pop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes fbv-pop{from{opacity:0;transform:translateY(6px)}}
+
+/* ---------- form: submit button ---------- */
+html:root body .fbform .submit{
+  position:relative;overflow:hidden;border:0;border-radius:16px;padding:14px;
+  background:var(--grad);color:#fff;font:600 16px var(--font-body);letter-spacing:.02em;
+  box-shadow:0 14px 30px -12px color-mix(in srgb,var(--blue) 80%,transparent),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s;
+}
+html:root body .fbform .submit::after{
+  content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);
+  transform:translateX(-130%) skewX(-18deg);
+}
+html:root body .fbform .submit:hover{transform:translateY(-2px) scale(1.015);box-shadow:0 20px 38px -12px color-mix(in srgb,var(--blue) 90%,transparent),inset 0 1px 0 rgba(255,255,255,.4)}
+html:root body .fbform .submit:hover::after{transform:translateX(230%) skewX(-18deg);transition:transform .9s cubic-bezier(.16,1,.3,1)}
+html:root body .fbform .submit:active{transform:scale(.985)}
+
+/* ---------- slider card ---------- */
+html:root body #feedback .fbview{gap:0;padding:26px 30px 22px;display:flex;flex-direction:column}
+.fbv-glow{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(420px circle at var(--mx,70%) var(--my,20%),color-mix(in srgb,var(--blue) 26%,transparent),transparent 62%),
+    radial-gradient(360px 260px at 100% 100%,color-mix(in srgb,var(--acc2) 22%,transparent),transparent 70%),
+    radial-gradient(300px 220px at 0% 0%,color-mix(in srgb,var(--glow-1) 30%,transparent),transparent 70%);
+  transition:background .2s;
+}
+.fbv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.fbv-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--blue)}
+.fbv-eyebrow::before{content:"";width:22px;height:1px;background:linear-gradient(90deg,transparent,var(--blue))}
+html:root body .fbview h3{margin:6px 0 0;font-size:clamp(22px,2.2vw,28px);letter-spacing:-.01em}
+.fbv-sum{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 12px;border-radius:16px;border:1px solid var(--line);background:color-mix(in srgb,var(--surf2) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.fbv-sum[hidden]{display:none}
+.fbv-sum b{font:700 28px/1 var(--font-head);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.fbv-sum-s{display:flex;flex-direction:column;gap:3px}
+.fbv-sum-s small{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.fbv-sum .fb-stars svg{width:13px;height:13px}
+.fbv-quote{position:absolute;top:74px;right:26px;width:96px;height:72px;fill:color-mix(in srgb,var(--blue) 16%,transparent);z-index:0;pointer-events:none;transform:rotate(0deg)}
+
+.fb-track{position:relative;z-index:1;margin:14px -30px 0;padding:0 30px;scroll-padding:0 30px;border-radius:0}
+.fb-track.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing;user-select:none}
+.fb-track{cursor:grab}
+.fb-slide{flex:0 0 100%;padding:10px 0 6px;gap:18px;justify-content:center;min-height:220px}
+.fb-slide > *{opacity:0;transform:translateY(16px);filter:blur(5px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1),filter .7s}
+.fb-slide.is-active > *{opacity:1;transform:none;filter:none}
+.fb-slide.is-active > :nth-child(2){transition-delay:.08s}
+.fb-slide.is-active > :nth-child(3){transition-delay:.16s}
+.fb-slide.is-active > :nth-child(4){transition-delay:.24s}
+.fb-slide.fb-empty > *{opacity:1;transform:none;filter:none}
+.fb-top{display:flex;align-items:center;gap:10px}
+.fb-stars svg{width:20px;height:20px;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--star) 45%,transparent))}
+.fb-stars svg.off{filter:none}
+.fb-num{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.fb-text{font-size:clamp(17px,1.5vw,20px);line-height:1.7;font-weight:400;color:var(--ink);letter-spacing:.005em}
+.fb-by{gap:14px;flex-wrap:nowrap;padding-top:16px;margin-top:2px;border-top:1px solid var(--line)}
+.fb-av{
+  flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;
+  font:700 18px var(--font-head);color:#fff;
+  background:linear-gradient(135deg,hsl(var(--h,260) 78% 62%),hsl(calc(var(--h,260) + 55) 80% 66%));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--surf2) 80%,transparent),0 0 0 4px color-mix(in srgb,var(--blue) 35%,transparent),0 10px 22px -8px hsl(var(--h,260) 80% 50%);
+}
+.fb-who{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fb-name{font-size:15px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fb-who small{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.04em}
+.fb-more{font-weight:600;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:1px}
+
+/* autoplay progress */
+.fb-prog{position:relative;z-index:1;height:3px;margin:14px 0 14px;border-radius:3px;background:color-mix(in srgb,var(--muted) 20%,transparent);overflow:hidden}
+.fb-prog[hidden]{display:none}
+.fb-prog i{position:absolute;inset:0;border-radius:inherit;background:var(--grad);transform:scaleX(0);transform-origin:left}
+.fb-prog.run i{animation:fbv-prog 6s linear forwards}
+@keyframes fbv-prog{to{transform:scaleX(1)}}
+
+/* controls */
+.fb-nav{position:relative;z-index:1}
+.fb-mid{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0}
+.fb-count{display:flex;align-items:baseline;gap:6px;font-family:var(--font-head);letter-spacing:.06em}
+.fb-count b{font-size:20px;font-weight:700;color:var(--ink)}
+.fb-count span{color:var(--muted);opacity:.6}
+.fb-count em{font-style:normal;font-size:13px;color:var(--muted)}
+.fb-btn{width:44px;height:44px;border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--surf2) 85%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .25s,color .25s,border-color .25s,box-shadow .3s}
+.fb-btn:hover{background:var(--grad);color:#fff;border-color:transparent;transform:scale(1.1);box-shadow:0 10px 22px -8px color-mix(in srgb,var(--blue) 85%,transparent)}
+.fb-btn:active{transform:scale(.94)}
+.fb-btn:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.fb-dots{gap:7px}
+.fb-dots button{width:7px;height:7px;transition:width .35s cubic-bezier(.16,1,.3,1),background .3s}
+.fb-dots button[aria-current="true"]{width:26px;background:var(--grad)}
+
+/* ---------- cinematic idle motion ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .fbv-glow{animation:fbv-drift 14s ease-in-out infinite alternate}
+  .fbv-quote{animation:fbv-float 7s ease-in-out infinite}
+  .fb-av{animation:fbv-ring 4.5s ease-in-out infinite}
+}
+@keyframes fbv-drift{from{filter:hue-rotate(0deg) saturate(1)}to{filter:hue-rotate(-18deg) saturate(1.25)}}
+@keyframes fbv-float{50%{transform:translateY(-8px) rotate(-3deg)}}
+@keyframes fbv-ring{50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--surf2) 80%,transparent),0 0 0 7px color-mix(in srgb,var(--blue) 18%,transparent),0 10px 22px -8px hsl(var(--h,260) 80% 50%)}}
+@media (prefers-reduced-motion:reduce){
+  .fb-slide > *{opacity:1;transform:none;filter:none;transition:none}
+  .fb-prog{display:none}
+}
+
+/* ---------- small screens ---------- */
+@media (max-width:899px){
+  html:root body #feedback .fbview{padding:22px 20px 18px}
+  .fb-track{margin:12px -20px 0;padding:0 20px;scroll-padding:0 20px}
+  .fbv-quote{width:64px;height:48px;top:70px;right:18px}
+  .fb-slide{min-height:200px}
+}
