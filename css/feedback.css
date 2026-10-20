@@ -143,3 +143,7 @@ html:root body .fbview h3{margin:6px 0 0;font-size:clamp(22px,2.2vw,28px);letter
   .fbv-quote{width:64px;height:48px;top:70px;right:18px}
   .fb-slide{min-height:200px}
 }
+
+/* dark theme: dark text on the bright cyan gradient (contrast) */
+html:root[data-theme="dark"] body .fbform .submit,
+html:root[data-theme="dark"] body .fb-btn:hover{color:#02131c}
