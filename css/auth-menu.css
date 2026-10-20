@@ -67,3 +67,34 @@ html:root body .acct.open .acct-menu .am-login{transition-delay:0s,0s,0s,0s,0s,.
 @keyframes am-in{from{opacity:0;transform:translateY(8px)}}
 @media (prefers-reduced-motion:reduce){.am-signup::after{display:none}}
 @media (max-width:420px){html:root body .acct-menu{width:min(272px,calc(100vw - 32px))}}
+
+/* ================= LOOK OPTIONS (fix: page text showing through the menu) =================
+   Pick one by changing data-look on <div class="acct-menu" id="acctMenu" data-look="...">:
+     solid  (default)  opaque frosted card that follows the light / dark theme
+     glass             slightly see-through tint, but the page behind is hidden enough to read the text
+     brand             deep brand-colour panel with white text, the same in every theme          */
+html:root body .acct-menu{
+  --am-base:var(--bg);
+  background:
+    radial-gradient(220px 120px at 100% 0%,color-mix(in srgb,var(--acc2) 22%,transparent),transparent 70%),
+    radial-gradient(220px 140px at 0% 0%,color-mix(in srgb,var(--blue) 18%,transparent),transparent 70%),
+    linear-gradient(var(--surf2),var(--surf2)),
+    var(--am-base);
+}
+html:root body .acct-menu[data-look="glass"]{
+  --am-base:color-mix(in srgb,var(--bg) 96%,transparent);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+}
+html:root body .acct-menu[data-look="brand"]{
+  --ink:#fff;--muted:rgba(255,255,255,.72);--line:rgba(255,255,255,.2);
+  background:
+    radial-gradient(240px 160px at 100% 0%,rgba(255,143,192,.38),transparent 70%),
+    radial-gradient(240px 180px at 0% 100%,rgba(120,100,255,.45),transparent 70%),
+    linear-gradient(160deg,#2b1f8a,#17104f 70%,#0d0932);
+  border-color:rgba(255,255,255,.18);
+}
+html:root body .acct-menu[data-look="brand"] a.am-login{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28)}
+html:root body .acct-menu[data-look="brand"] a.am-login:hover{background:rgba(255,255,255,.16);border-color:#fff}
+html:root body .acct-menu[data-look="brand"] a.am-signup{background:#fff;color:#2b1f8a;box-shadow:0 14px 28px -12px rgba(0,0,0,.5)}
+html:root body .acct-menu[data-look="brand"] a.am-signup:hover{background:#fff}
+html:root body .acct-menu[data-look="brand"] a.am-signup::after{background:linear-gradient(105deg,transparent 35%,rgba(107,87,224,.28) 50%,transparent 65%)}
