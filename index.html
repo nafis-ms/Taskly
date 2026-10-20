@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="css/chat.css?v=1" />
     <link rel="stylesheet" href="css/cinematic.css?v=3" />
     <link rel="stylesheet" href="css/sections.css?v=9" />
+    <link rel="stylesheet" href="css/feedback.css?v=1" />
   </head>
   <body>
     <svg
@@ -337,6 +338,7 @@
                     ><span class="fb-sr">1 star</span></label
                   >
                 </div>
+                <span class="rate-cap" id="fbcap" aria-hidden="true">Tap a star to rate</span>
                 <span class="err" id="fbrerr"></span>
               </fieldset>
               <fieldset class="who">
@@ -378,7 +380,18 @@
             </form>
 
             <div class="card fbview" id="fbview">
-              <h3>What people say</h3>
+              <span class="fbv-glow" aria-hidden="true"></span>
+              <div class="fbv-head">
+                <div>
+                  <span class="fbv-eyebrow">Loved by our users</span>
+                  <h3>What people say</h3>
+                </div>
+                <div class="fbv-sum" id="fbsum" hidden>
+                  <b id="fbavg">5.0</b>
+                  <span class="fbv-sum-s"><span class="fb-stars" id="fbavgst"></span><small id="fbtotal">0 reviews</small></span>
+                </div>
+              </div>
+              <svg class="fbv-quote" viewBox="0 0 48 36" aria-hidden="true"><path d="M0 36V21.6C0 9.6 6.6 2.4 19.2 0l2.4 5.4C14.4 7.8 11.4 12 11.4 17.4H21V36H0zm27 0V21.6C27 9.6 33.6 2.4 46.2 0l2.4 5.4C41.4 7.8 38.4 12 38.4 17.4H48V36H27z"/></svg>
               <div
                 class="fb-track"
                 id="fbtrack"
@@ -386,11 +399,15 @@
                 role="group"
                 aria-label="Customer feedback"
               ></div>
+              <div class="fb-prog" id="fbprog" aria-hidden="true"><i></i></div>
               <div class="fb-nav" id="fbnav" hidden>
                 <button type="button" class="fb-btn" id="fbprev" aria-label="Previous feedback">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
                 </button>
-                <div class="fb-dots" id="fbdots"></div>
+                <div class="fb-mid">
+                  <div class="fb-count" aria-hidden="true"><b id="fbcur">01</b><span>/</span><em id="fbtot">01</em></div>
+                  <div class="fb-dots" id="fbdots"></div>
+                </div>
                 <button type="button" class="fb-btn" id="fbnext" aria-label="Next feedback">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                 </button>
@@ -545,7 +562,7 @@
     </div>
     <script src="js/store.js?v=2"></script>
     <script src="js/auth.js?v=3"></script>
-    <script src="js/script.js?v=28"></script>
+    <script src="js/script.js?v=29"></script>
     <script src="js/contact-info.js?v=1" defer></script>
     <script src="js/developers.js?v=2" defer></script>
     <script src="js/premium.js?v=3" defer></script>
