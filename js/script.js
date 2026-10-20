@@ -1004,10 +1004,15 @@
     $("fbavgst").innerHTML = st.innerHTML;
     sum.hidden = false;
   }
+  var tgt = null, tgtT = 0;
+  function at() { return tgt === null ? index() : tgt; }
   function go(i) {
     var n = count();
     if (!n) return;
     i = (i + n) % n;
+    tgt = i;
+    clearTimeout(tgtT);
+    tgtT = setTimeout(function () { tgt = null; }, 700);
     track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? "auto" : "smooth" });
   }
   function render(emptyMsg) {
@@ -1042,7 +1047,7 @@
     if (prog) prog.classList.remove("run");
     var expanded = track.querySelector('.fb-more[aria-expanded="true"]');
     if (reduce || count() < 2 || hold || expanded || !visible || document.hidden) return;
-    timer = setInterval(function () { go(index() + 1); bar(); }, AUTOPLAY);
+    timer = setInterval(function () { go(at() + 1); bar(); }, AUTOPLAY);
     bar();
   }
   function pause(ms) {
@@ -1056,8 +1061,8 @@
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(mark);
   });
-  $("fbprev").onclick = function () { go(index() - 1); play(); };
-  $("fbnext").onclick = function () { go(index() + 1); play(); };
+  $("fbprev").onclick = function () { go(at() - 1); play(); };
+  $("fbnext").onclick = function () { go(at() + 1); play(); };
   card.addEventListener("mouseenter", function () { pause(); });
   card.addEventListener("mouseleave", resume);
   card.addEventListener("focusin", function () { pause(); });
