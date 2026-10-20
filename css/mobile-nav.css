@@ -1,0 +1,122 @@
+/* Premium mobile navigation + hero buttons (phones only). Load last. */
+@media (max-width:767px){
+
+  /* ---------- bar ---------- */
+  html:root body .nav{
+    width:calc(100% - 28px);max-width:420px;justify-content:space-between;gap:10px;
+    padding:8px 8px 8px 16px;border-radius:22px;
+    top:calc(env(safe-area-inset-top,0px) + 14px);
+    transition:transform .6s cubic-bezier(.16,1,.3,1),box-shadow .4s,background .4s;
+  }
+  html:root body .nav.nav-hide{transform:translateY(calc(-100% - 40px))}
+  html:root body .nav.nav-solid{box-shadow:0 18px 44px -16px rgba(30,15,90,.45)}
+  html:root body .logo{font-size:21px;margin-right:auto}
+  html:root body .tools{gap:8px}
+  html:root body .acct{display:none}              /* log in / sign up live in the menu on phones */
+  html:root body .main{padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+
+  html:root body .nav .acct-btn,
+  html:root body .nav .burger{
+    width:42px;height:42px;border-radius:14px;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,background .3s;
+  }
+  html:root body .nav .acct-btn:active,html:root body .nav .burger:active{transform:scale(.9)}
+
+  /* burger -> animated 3 line icon that morphs into a cross */
+  html:root body .burger{
+    position:relative;display:block;padding:0;border:0;
+    background:linear-gradient(var(--surf2),var(--surf2)) padding-box,linear-gradient(var(--bg),var(--bg)) padding-box,var(--grad) border-box!important;
+    border:1.5px solid transparent;
+    box-shadow:0 8px 20px -10px color-mix(in srgb,var(--blue) 80%,transparent);
+  }
+  html:root body .burger span{
+    position:absolute;left:50%;top:50%;width:18px;height:2px;margin:-1px 0 0 -9px;border-radius:2px;
+    background:var(--grad);transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .25s,width .4s cubic-bezier(.16,1,.3,1);
+  }
+  html:root body .burger span:first-child{transform:translateY(-5px)}
+  html:root body .burger span:last-child{transform:translateY(5px)}
+  html:root body .burger::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;margin:-1px 0 0 -9px;border-radius:2px;background:var(--grad);transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .25s}
+  html:root body .burger[aria-expanded="true"]{box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 18%,transparent),0 10px 24px -10px color-mix(in srgb,var(--blue) 90%,transparent)}
+  html:root body .burger[aria-expanded="true"] span:first-child{transform:rotate(45deg);width:20px;margin-left:-10px}
+  html:root body .burger[aria-expanded="true"] span:last-child{transform:rotate(-45deg);width:20px;margin-left:-10px}
+  html:root body .burger[aria-expanded="true"]::after{opacity:0;transform:scaleX(0)}
+
+  /* ---------- backdrop ---------- */
+  .mm-backdrop{position:fixed;inset:0;z-index:48;background:radial-gradient(120% 80% at 50% 0%,rgba(40,20,110,.38),rgba(8,4,28,.62));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .45s}
+  .mm-backdrop.on{opacity:1;pointer-events:auto}
+  html.mm-open{overflow:hidden}
+
+  /* ---------- sheet ---------- */
+  html:root body .mmenu{
+    left:14px;right:14px;max-width:420px;margin:0 auto;
+    top:calc(env(safe-area-inset-top,0px) + 14px + 74px);
+    padding:10px;gap:6px;border-radius:26px;overflow:hidden;
+    border:1px solid color-mix(in srgb,var(--blue) 26%,var(--line));
+    background:
+      radial-gradient(260px 160px at 100% 0%,color-mix(in srgb,var(--acc2) 24%,transparent),transparent 70%),
+      radial-gradient(260px 180px at 0% 0%,color-mix(in srgb,var(--blue) 20%,transparent),transparent 70%),
+      var(--surf2);
+    box-shadow:var(--shadow);
+    transform-origin:50% 0;
+    animation:mm-sheet .6s cubic-bezier(.16,1,.3,1) both;
+  }
+  html:root body .mmenu::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--grad)}
+  html:root body .mmenu[hidden]{display:none}
+  .mm-links{display:flex;flex-direction:column;padding-top:4px}
+  html:root body .mmenu .mm-links a{
+    display:flex;align-items:center;gap:14px;padding:15px 14px;border-radius:16px;
+    font:600 18px var(--font-head);letter-spacing:-.01em;color:var(--ink);
+    position:relative;animation:mm-item .6s cubic-bezier(.16,1,.3,1) both;
+    transition:background .25s,transform .3s cubic-bezier(.16,1,.3,1),color .25s;
+  }
+  .mm-links a em{font:600 11px var(--font-body);font-style:normal;letter-spacing:.18em;color:var(--blue);opacity:.75;min-width:20px}
+  .mm-links a span{flex:1}
+  .mm-ch{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.35;transition:transform .3s,opacity .3s}
+  html:root body .mmenu .mm-links a:active{background:color-mix(in srgb,var(--blue) 14%,transparent);transform:scale(.98)}
+  html:root body .mmenu .mm-links a[aria-current="true"]{background:linear-gradient(90deg,color-mix(in srgb,var(--blue) 18%,transparent),transparent);color:var(--blue)}
+  html:root body .mmenu .mm-links a[aria-current="true"]::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:3px;background:var(--grad);box-shadow:0 0 12px var(--blue)}
+  .mm-links a[aria-current="true"] .mm-ch{opacity:1;transform:translateX(3px)}
+  .mm-links a:nth-child(1){animation-delay:.05s}.mm-links a:nth-child(2){animation-delay:.1s}.mm-links a:nth-child(3){animation-delay:.15s}
+  .mm-links a:nth-child(4){animation-delay:.2s}.mm-links a:nth-child(5){animation-delay:.25s}.mm-links a:nth-child(6){animation-delay:.3s}
+
+  .mm-cta{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;padding:10px 4px 4px;margin-top:4px;border-top:1px solid var(--line);animation:mm-item .6s .32s cubic-bezier(.16,1,.3,1) both}
+  html:root body .mmenu .mm-cta a.am-btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px 14px;border-radius:16px;font:600 15px var(--font-body);letter-spacing:.01em;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}
+  html:root body .mmenu .mm-cta a.am-login{border:1px solid color-mix(in srgb,var(--blue) 34%,var(--line));background:color-mix(in srgb,var(--surf2) 85%,transparent)}
+  html:root body .mmenu .mm-cta a.am-signup{border:0;background:var(--grad);box-shadow:0 14px 28px -12px color-mix(in srgb,var(--blue) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.4)}
+  html:root body .mmenu .mm-cta a.am-logout{border:1px solid var(--line);background:color-mix(in srgb,var(--surf2) 85%,transparent)}
+  html:root body .mmenu .mm-cta a.am-btn:active{transform:scale(.96)}
+  html:root body .mmenu .mm-cta a.am-btn[hidden]{display:none}
+  .mm-cta a.am-btn span{flex:none}
+  .mm-cta a.am-logout{grid-column:1/-1}
+  .mm-cta a[hidden],.mm-links a[hidden]{display:none!important}
+  html:root body .mmenu .mm-cta a.am-signup{color:#fff}
+  html:root body .mmenu .mm-cta a.am-login{color:var(--ink)}
+  html:root body .mmenu .mm-cta a.am-btn{animation:none}
+
+  @keyframes mm-sheet{from{opacity:0;transform:translateY(-14px) scale(.94);filter:blur(10px)}}
+  @keyframes mm-item{from{opacity:0;transform:translateX(-18px);filter:blur(4px)}}
+
+  /* ---------- hero buttons ---------- */
+  html:root body .ctas{flex-direction:column;align-items:stretch;gap:12px;width:100%}
+  html:root body .cta,html:root body .cta2{width:100%;box-sizing:border-box;justify-content:space-between;margin:0}
+  html:root body .cta{
+    padding:9px 9px 9px 26px;border-radius:999px;font-weight:600;
+    background:var(--grad);
+    box-shadow:0 18px 36px -14px color-mix(in srgb,var(--blue) 90%,transparent),inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  html:root body .cta .ic{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;transition:transform .4s cubic-bezier(.16,1,.3,1)}
+  html:root body .cta:active .ic{transform:translateX(4px)}
+  html:root body .cta2{
+    justify-content:center;padding:16px 24px;border:1px solid color-mix(in srgb,var(--blue) 40%,var(--line));border-width:1.5px;
+    background:color-mix(in srgb,var(--surf2) 80%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border-radius:999px;
+  }
+  html:root body .cta2:hover{background:color-mix(in srgb,var(--surf2) 80%,transparent);color:var(--ink);transform:none}
+  html:root body .cta2:active{transform:scale(.98)}
+  html:root body .hero .ctas{animation:mm-item .8s .5s cubic-bezier(.16,1,.3,1) both}
+}
+@media (max-width:767px) and (prefers-reduced-motion:reduce){
+  html:root body .mmenu,.mm-links a,.mm-cta,html:root body .hero .ctas{animation:none!important}
+  html:root body .nav{transition:none}
+}
